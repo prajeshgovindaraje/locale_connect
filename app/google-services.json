@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "582359778796",
+    "project_id": "video-game-collections-dd8a6",
+    "storage_bucket": "video-game-collections-dd8a6.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:582359778796:android:1bdc5e21393ffb72b3ecc9",
+        "android_client_info": {
+          "package_name": "com.example.video_game_collections"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBs2GPdHMyVMoSvqj2P1x_ha9_q0k2CbLU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
