@@ -40,6 +40,10 @@ fun navUtitlity(
             )
         }
 
+        composable<allProductsBySellerPage> {
+            allProductsBySeller(fireStoreViewModel = fireStoreViewModel)
+        }
+
 
     }
 
@@ -60,3 +64,6 @@ object customerPage
 
 @Serializable
 object sellerPage
+
+@Serializable
+object allProductsBySellerPage

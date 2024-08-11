@@ -108,7 +108,13 @@ fun sellerScreen(
 
             Spacer(modifier = Modifier.height(30.dp))
 
+            Button(onClick = {
+                navController.navigate(allProductsBySellerPage)
+            }) {
+                Text(text = "See All Products")
+            }
 
+            Spacer(modifier = Modifier.height(30.dp))
 
 
             TextButton(onClick = {
@@ -117,6 +123,11 @@ fun sellerScreen(
                 Text(text = "SIGN OUT")
             }
         }
+
+
+
+
+
 
         if(observedAddProductDialogueCardState.value == true){
             addProductDialogueCard(
