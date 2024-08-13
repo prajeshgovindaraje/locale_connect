@@ -28,7 +28,11 @@ fun navUtitlity(
         }
 
         composable<customerPage> {
-            cutomerScreen(viewModel = viewModel, navController = navController)
+            cutomerScreen(
+                fireBaseAuthViewModel = viewModel,
+                navController = navController,
+                fireStoreViewModel = fireStoreViewModel,
+            )
         }
 
         composable<sellerPage> {
@@ -67,3 +71,11 @@ object sellerPage
 
 @Serializable
 object allProductsBySellerPage
+
+@Serializable
+data class productDescriptionPage(
+        val pName : String,
+        val pCost : Int,
+        val sellerId : String
+
+        )

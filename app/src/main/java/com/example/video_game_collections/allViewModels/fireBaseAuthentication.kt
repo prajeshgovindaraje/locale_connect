@@ -38,25 +38,45 @@ class fireBaseAuthViewModel : ViewModel(){
 
 
     fun loginUser(email : String, password : String){
-
+        Log.i("response","inside login User")
         auth.signInWithEmailAndPassword(email,password)
             .addOnSuccessListener {
+
                 _loginStatusState.value = loginStatus.LoggedIn
+                Log.i("response","inside login success")
+
             }
             .addOnFailureListener {
+                Log.i("response","inside login failure")
+
                 _loginStatusState.value = loginStatus.LoggedOut
             }
 
     }
 
 
-    fun siginInUser(email : String, password : String,role : String){
+    fun siginInUser(
+        email: String,
+        password: String,
+        role: String,
+        userName: String,
+        shopName: String?,
+        shopType : String?
+
+    ){
 
         auth.createUserWithEmailAndPassword(email,password)
             .addOnSuccessListener {
                 Log.i("response","inside create user success")
                 var id = it.user?.uid
-                var tempUsersModel  = usersModel(id,email,role)
+                var tempUsersModel  = usersModel(
+                    userID = id,
+                    email = email,
+                    role = role,
+                    userName = userName,
+                    shopName = shopName,
+                    shopType = shopType
+                )
 
 
                 db.collection("users")

@@ -1,5 +1,15 @@
 package com.example.video_game_collections.Screens
 
+import android.Manifest
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.location.LocationManager
+import android.provider.Settings
+import android.util.Log
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -36,11 +46,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import com.example.video_game_collections.allViewModels.UI_ViewModel
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
 import com.example.video_game_collections.allViewModels.loginStatus
+import com.google.android.gms.location.LocationServices
+
+
 
 @Composable
 fun sellerScreen(
@@ -53,25 +67,78 @@ fun sellerScreen(
 
     val observedAddProductDialogueCardState = ui_viewModel.addProductDialogueCardState.observeAsState(initial = false)
     val observedLoginStatus  = fireBaseAuthViewModel.loginStatusState.observeAsState()
-    var context = LocalContext.current
+
+
+    val context = LocalContext.current
+    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+
+    // Request permission launcher
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            Log.i("response", "Permission Granted")
+            // Call function to get and print the current location
+            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        Log.i("Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+                    } else {
+                        Log.i("Location", "Failed to retrieve location")
+                    }
+                }
+                .addOnFailureListener { e ->
+                    Log.e("response", "Error getting location: ${e.message}")
+                }
+        } else {
+            Log.i("response", "Permission Denied")
+        }
+    }
+
 
     LaunchedEffect(key1 = observedLoginStatus.value) {
-
-        when(observedLoginStatus.value){
-            //is loginStatus.Error -> TODO()
+        when (observedLoginStatus.value) {
             is loginStatus.LoggedIn -> {
-                //do nothing
+                Log.i("response", "Checking Location Permission and Services")
 
+                // Check if location services are enabled
+                if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                    // Show settings to turn on GPS
+                    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                } else if (ContextCompat.checkSelfPermission(
+                        context,
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) != PackageManager.PERMISSION_GRANTED
+                ) {
+                    // Request location permission
+                    locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                } else {
+                    // Permission granted, and services enabled
+                    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+                    fusedLocationClient.lastLocation
+                        .addOnSuccessListener { location ->
+                            if (location != null) {
+                                Log.i("Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
+                            } else {
+                                Log.i("Location", "Failed to retrieve location")
+                            }
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("response", "Error getting location: ${e.message}")
+                        }
+                }
             }
             is loginStatus.LoggedOut -> {
-
                 navController.navigate(loginPage)
-
             }
             else -> Unit
         }
-
     }
+
+    // Function to get the current location and print it
+
+
 
 
 
@@ -139,6 +206,7 @@ fun sellerScreen(
     }
 
 }
+
 
 
 @Composable

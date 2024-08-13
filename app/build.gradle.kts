@@ -6,6 +6,8 @@ plugins {
 
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.google.gms.google.services)
+
+    //
 }
 
 android {
@@ -81,4 +83,9 @@ dependencies {
 
     //livedata
     implementation("androidx.compose.runtime:runtime-livedata:1.6.8")
+
+    implementation ("com.google.android.gms:play-services-location:21.3.0")
+
+
+
 }

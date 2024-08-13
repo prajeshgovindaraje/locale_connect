@@ -19,11 +19,17 @@ class fireStoreViewModel : ViewModel() {
         private var _allProductsBySellerState = MutableLiveData<MutableList<productModel>>()
         var allProductsBySellerState : LiveData<MutableList<productModel>> = _allProductsBySellerState
 
+    private var _allProductsForCustomerState = MutableLiveData<MutableList<productModel>>()
+    var allProductsForCustomerState : LiveData<MutableList<productModel>> = _allProductsForCustomerState
+
 
 
     init {
-        displayAllProductsBySeller()
+       // displayAllProductsBySeller()
+        displayAllProductsforCustomer()
+
     }
+
 
     fun addProductsIntoDB( pname : String, pcost : Int, sellerId : String ){
 
@@ -40,13 +46,13 @@ class fireStoreViewModel : ViewModel() {
         }
 
 
-        var tempProductsList  = mutableListOf<productModel>()
+        var tempProductsListBySeller  = mutableListOf<productModel>()
         fun displayAllProductsBySeller(){
             db.collection(productsCollection)
                 .addSnapshotListener { value, error ->
 
                     if (value != null) {
-                        tempProductsList.clear()
+                        tempProductsListBySeller.clear()
 
                         for(it in value){
 
@@ -57,18 +63,52 @@ class fireStoreViewModel : ViewModel() {
                                         sellerID = it["sellerID"].toString()
                                     )
 
-                                    tempProductsList.add(tempProductModel)
+                                    tempProductsListBySeller.add(tempProductModel)
                                 }
 
 
                         }
                     }
 
-                    _allProductsBySellerState.value = tempProductsList.toMutableList()
+                    _allProductsBySellerState.value = tempProductsListBySeller.toMutableList()
 
                 }
 
         }
+
+
+
+
+
+    var tempProductsListforCustomer  = mutableListOf<productModel>()
+    fun displayAllProductsforCustomer(){
+        db.collection(productsCollection)
+            .addSnapshotListener { value, error ->
+
+                if (value != null) {
+                    tempProductsListforCustomer.clear()
+
+                    for(it in value){
+
+
+                            var tempProductModel = productModel(
+                                pCost = it["pcost"].toString().toInt(),
+                                pName = it["pname"].toString(),
+                                sellerID = it["sellerID"].toString()
+                            )
+
+                        tempProductsListforCustomer.add(tempProductModel)
+
+
+
+                    }
+                }
+
+                _allProductsForCustomerState.value = tempProductsListforCustomer.toMutableList()
+
+            }
+
+    }
 
 
 
