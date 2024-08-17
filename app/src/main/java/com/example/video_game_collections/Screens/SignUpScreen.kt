@@ -165,9 +165,9 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
                     focusedBorderColor = Color.Green,
                     unfocusedBorderColor = Color.Green,
                     disabledBorderColor = Color.Green,
-                    focusedLabelColor = Color.Green,
-                    unfocusedLabelColor = Color.Green,
-                    disabledLabelColor = Color.Green
+                    focusedLabelColor = Color.Black,
+                    unfocusedLabelColor = Color.Black,
+                    disabledLabelColor = Color.Black
                 ),
                 keyboardOptions = KeyboardOptions.Default
             )
