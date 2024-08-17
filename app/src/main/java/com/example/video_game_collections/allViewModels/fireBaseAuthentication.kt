@@ -64,6 +64,7 @@ class fireBaseAuthViewModel : ViewModel(){
         shopType : String?
 
     ){
+        Log.i("response","sigin function called")
 
         auth.createUserWithEmailAndPassword(email,password)
             .addOnSuccessListener {
@@ -75,21 +76,27 @@ class fireBaseAuthViewModel : ViewModel(){
                     role = role,
                     userName = userName,
                     shopName = shopName,
-                    shopType = shopType
+                    shopType = shopType,
+                    location = emptyList()
                 )
 
 
-                db.collection("users")
-                    .add(tempUsersModel)
-                    .addOnSuccessListener {
-                        Log.i("response","inside into db success")
+                if (id != null) {
+                    db.collection("users")
+                        .document(id)
+                        .set(tempUsersModel)
+                        .addOnSuccessListener {
+                            Log.i("response","inside into db success")
 
-                    }
+                        }
+                }
 
 
                 _loginStatusState.value = loginStatus.LoggedIn
             }
             .addOnFailureListener {
+                Log.i("response","failed to sigin into db${it.message} ")
+
                 _loginStatusState.value = loginStatus.LoggedOut
             }
 
@@ -125,7 +132,14 @@ class fireBaseAuthViewModel : ViewModel(){
 
     }
 
+    fun getShopName(callback:(String) -> Unit, userID : String){
 
+        db.collection("users").document(userID).addSnapshotListener { value, error ->
+
+
+        }
+
+    }
 
     fun signOut(){
 

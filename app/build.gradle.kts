@@ -68,6 +68,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
+    implementation(libs.androidx.media3.common)
+    implementation(libs.firebase.storage)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -84,8 +86,12 @@ dependencies {
     //livedata
     implementation("androidx.compose.runtime:runtime-livedata:1.6.8")
 
+    //google play services
     implementation ("com.google.android.gms:play-services-location:21.3.0")
 
+
+    //coil
+    implementation("io.coil-kt:coil-compose:2.7.0")
 
 
 }

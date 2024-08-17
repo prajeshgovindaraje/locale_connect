@@ -11,19 +11,35 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
 import com.example.video_game_collections.dataModels.productModel
 
 @Composable
-fun allProductsBySeller(modifier: Modifier = Modifier,fireStoreViewModel: fireStoreViewModel) {
+fun allProductsBySeller(
+    modifier: Modifier = Modifier,
+    fireStoreViewModel: fireStoreViewModel,
+    authViewModel: fireBaseAuthViewModel
+) {
 
     var observeAllProductsBySellerState = fireStoreViewModel.allProductsBySellerState.observeAsState(
         emptyList<productModel>()
     )
+
+   LaunchedEffect(null) {
+
+       var userID =  authViewModel.auth.currentUser?.uid
+
+
+   }
+
+    Text(text = "All products by  a seller")
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -42,10 +58,14 @@ fun allProductsBySeller(modifier: Modifier = Modifier,fireStoreViewModel: fireSt
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-
+                    AsyncImage(
+                        model = it.imageURL,
+                        contentDescription = null,
+                    )
                     Text(text = it.pName)
                     Spacer(modifier = Modifier.height(5.dp))
                     Text(text = it.pCost.toString())
+
 
                 }
 

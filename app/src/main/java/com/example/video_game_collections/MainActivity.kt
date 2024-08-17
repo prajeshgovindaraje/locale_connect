@@ -12,6 +12,8 @@ import com.example.video_game_collections.Screens.navUtitlity
 import com.example.video_game_collections.allViewModels.UI_ViewModel
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
+import com.example.video_game_collections.allViewModels.imageViewModel
+import com.example.video_game_collections.allViewModels.locationViewModel
 
 import com.example.video_game_collections.ui.theme.Video_Game_CollectionsTheme
 
@@ -22,13 +24,22 @@ class MainActivity : ComponentActivity() {
         val myViewModel : fireBaseAuthViewModel by viewModels()
         val fireStoreViewModel : fireStoreViewModel by viewModels()
         val ui_viewModel : UI_ViewModel by viewModels()
+        val locationViewModel : locationViewModel by viewModels()
+        val imageViewModel : imageViewModel by viewModels()
+
 
         enableEdgeToEdge()
         setContent {
             Video_Game_CollectionsTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
 
-                    navUtitlity(myViewModel,fireStoreViewModel,ui_viewModel)
+                    navUtitlity(
+                        myViewModel,
+                        fireStoreViewModel,
+                        ui_viewModel,
+                        locationViewModel,
+                        imageViewModel = imageViewModel
+                    )
 
                 }
             }

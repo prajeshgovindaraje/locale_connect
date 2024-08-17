@@ -5,12 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.LocationManager
+import android.net.Uri
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -20,6 +23,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -41,6 +45,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -48,10 +53,15 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.example.video_game_collections.allViewModels.UI_ViewModel
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
+import com.example.video_game_collections.allViewModels.imageViewModel
+import com.example.video_game_collections.allViewModels.locationViewModel
 import com.example.video_game_collections.allViewModels.loginStatus
+import com.example.video_game_collections.helperFunctions.locationPermissionLauncher
+import com.example.video_game_collections.helperFunctions.locationSettingsLauncherFunction
 import com.google.android.gms.location.LocationServices
 
 
@@ -62,7 +72,9 @@ fun sellerScreen(
     fireBaseAuthViewModel: fireBaseAuthViewModel,
     navController: NavController,
     fireStoreViewModel: fireStoreViewModel,
-    ui_viewModel: UI_ViewModel
+    ui_viewModel: UI_ViewModel,
+    locationViewModel: locationViewModel,
+    imageViewModel: imageViewModel
 ) {
 
     val observedAddProductDialogueCardState = ui_viewModel.addProductDialogueCardState.observeAsState(initial = false)
@@ -70,64 +82,61 @@ fun sellerScreen(
 
 
     val context = LocalContext.current
-    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
-    // Request permission launcher
-    val locationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            Log.i("response", "Permission Granted")
-            // Call function to get and print the current location
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location ->
-                    if (location != null) {
-                        Log.i("Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
-                    } else {
-                        Log.i("Location", "Failed to retrieve location")
-                    }
-                }
-                .addOnFailureListener { e ->
-                    Log.e("response", "Error getting location: ${e.message}")
-                }
-        } else {
-            Log.i("response", "Permission Denied")
-        }
-    }
+    val obseveredLocationSettingsState = locationViewModel.locationSettingsState.observeAsState()
+    val obserevedLocationPermissionState = locationViewModel.locationPermissionState.observeAsState()
+    //creating a launcher for location settings
+    var settingsLauncher = locationSettingsLauncherFunction(context,locationViewModel,navController)
 
 
-    LaunchedEffect(key1 = observedLoginStatus.value) {
+    //creating a launcher for location permission
+    var permissionLauncher = locationPermissionLauncher(navController)
+
+
+
+    LaunchedEffect(
+        key1 = observedLoginStatus.value,
+        obseveredLocationSettingsState.value,
+        obserevedLocationPermissionState.value
+    ) {
         when (observedLoginStatus.value) {
             is loginStatus.LoggedIn -> {
                 Log.i("response", "Checking Location Permission and Services")
+                if(obserevedLocationPermissionState.value == true && obseveredLocationSettingsState.value == true){
+                    Log.i("getlocation","we can get ra")
+                    locationViewModel.getLastKnownLocation(context){
 
-                // Check if location services are enabled
-                if (!locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    // Show settings to turn on GPS
-                    context.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
-                } else if (ContextCompat.checkSelfPermission(
-                        context,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) != PackageManager.PERMISSION_GRANTED
-                ) {
-                    // Request location permission
-                    locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                } else {
-                    // Permission granted, and services enabled
-                    val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-                    fusedLocationClient.lastLocation
-                        .addOnSuccessListener { location ->
-                            if (location != null) {
-                                Log.i("Location", "Latitude: ${location.latitude}, Longitude: ${location.longitude}")
-                            } else {
-                                Log.i("Location", "Failed to retrieve location")
-                            }
+                        Log.i("getlocation",it.latitude.toString()+""+it.longitude.toString())
+                        var myLocation = listOf(it.latitude,it.longitude)
+                        var userId = fireBaseAuthViewModel.auth.currentUser?.uid
+
+                        if (userId != null) {
+                            fireStoreViewModel.updateUserModelWithlocation(
+                                userId,
+                                myLocation
+                            )
                         }
-                        .addOnFailureListener { e ->
-                            Log.e("response", "Error getting location: ${e.message}")
-                        }
+
+                    }
+
+
                 }
+
+
+                locationViewModel.checkLocationSettings(context, settingsLauncher){
+                    locationViewModel.checkLocationPermission(context,permissionLauncher){
+                        Log.i("locationresponse",obserevedLocationPermissionState.value.toString())
+
+                        if(obserevedLocationPermissionState.value == false){
+                            navController.navigate(permissionDeniedPage)
+                        }
+
+
+                    }
+
+                }
+
+
             }
             is loginStatus.LoggedOut -> {
                 navController.navigate(loginPage)
@@ -141,18 +150,90 @@ fun sellerScreen(
 
 
 
+    var selectedURI by remember {
+        mutableStateOf<String>("")
+    }
+
+    LaunchedEffect(null) {
+        fireBaseAuthViewModel.auth.currentUser?.let {
+            imageViewModel.getCurrentShopImageURL(
+                fireBaseAuthViewModel = fireBaseAuthViewModel,
+                userID = it.uid
+            ){
+                selectedURI = it
+            }
+        }
+    }
+
+    var galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = {
+
+            //this check so that when no image is chosen in gallery launcher then the previous one must remain
+            //else null will be assigned and image becomes empty
+            if(it != null){
+                fireBaseAuthViewModel.auth.currentUser?.let { it1 ->
+                    imageViewModel.uploadShopImage(
+                        fireStoreViewModel,
+                        it,
+                        it1.uid
+                    ){
+                        imageViewModel.getCurrentShopImageURL(
+                            fireBaseAuthViewModel = fireBaseAuthViewModel,
+                            userID = fireBaseAuthViewModel.auth.currentUser!!.uid,
+
+                        ){
+                            selectedURI = it
+                        }
+                    }
+                }
+
+
+            }
+        }
+
+
+    )
+
 
 
 
 
     Box(
         modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+       // contentAlignment = Alignment.Center
     ){
+        Box(modifier = Modifier
+            .fillMaxWidth()
+            .border(2.dp, Color.Cyan)
+
+            .height(150.dp)){
+            AsyncImage(
+
+                model = selectedURI,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .fillMaxHeight()
+                    .border(2.dp, Color.Red)
+                    .clickable {
+
+                        galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+
+                    },
+                contentDescription = null,
+                contentScale = ContentScale.Crop
+
+                )
+        }
+
         Column(
+            modifier =  Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
+
+
             Text(
                 text = "Seller Screen",
                 fontSize = 30.sp
@@ -176,6 +257,11 @@ fun sellerScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
             Button(onClick = {
+                fireBaseAuthViewModel.auth.currentUser?.let {
+                    fireStoreViewModel.displayAllProductsBySeller(
+                        it.uid)
+                }
+
                 navController.navigate(allProductsBySellerPage)
             }) {
                 Text(text = "See All Products")
@@ -200,7 +286,8 @@ fun sellerScreen(
             addProductDialogueCard(
                 fireStoreViewModel = fireStoreViewModel,
                 ui_viewModel = ui_viewModel,
-                fireBaseAuthViewModel = fireBaseAuthViewModel
+                fireBaseAuthViewModel = fireBaseAuthViewModel,
+                imageViewModel = imageViewModel
             )
         }
     }
@@ -214,15 +301,28 @@ fun addProductDialogueCard(
     modifier: Modifier = Modifier,
     fireStoreViewModel: fireStoreViewModel,
     ui_viewModel: UI_ViewModel,
-    fireBaseAuthViewModel: fireBaseAuthViewModel
+    fireBaseAuthViewModel: fireBaseAuthViewModel,
+    imageViewModel: imageViewModel
 ) {
 
     var pName by remember {
         mutableStateOf("")
     }
     var pCost by remember {
-        mutableStateOf(0)
+        mutableStateOf(0.0)
     }
+
+    var selectedURI by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
+    var galleryLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = {
+            selectedURI = it
+        }
+
+    )
 
     Dialog(
         onDismissRequest = { ui_viewModel.makeAddProductDialogueCardHidden() },
@@ -240,81 +340,132 @@ fun addProductDialogueCard(
             modifier = Modifier
                 .fillMaxHeight(0.5f)
                 .fillMaxWidth(0.9f)
-                .border(1.dp, Color.Cyan, RoundedCornerShape(15.dp))
+                .border(1.dp, Color.Cyan, RoundedCornerShape(15.dp)),
+
+
         ) {
 
-            Text(text = "ADD YOUR PRODUCT")
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(text = "ADD YOUR PRODUCT")
 
-            Spacer(modifier = Modifier.height(5.dp))
+                Spacer(modifier = Modifier.height(5.dp))
 
-            OutlinedTextField(
-                value = pName, onValueChange = {
+                OutlinedTextField(
+                    value = pName, onValueChange = {
 
-                    pName = it
+                        pName = it
 
-                },
-                label = {
-                    Text(text = "Product Name")
-                }
-            )
+                    },
+                    label = {
+                        Text(text = "Product Name")
+                    }
+                )
 
-            Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(10.dp))
 
-            OutlinedTextField(
-                value = pCost.toString(), onValueChange = {
+                OutlinedTextField(
+                    value = pCost.toString(), onValueChange = {
 
-                    if(it.isNotEmpty()){
-                        pCost = it.toInt()
+                        if(it.isNotEmpty()){
+                            pCost = it.toDouble()
 
-                    }else{
+                        }else{
+
+                        }
+
+                    },
+
+                    label = {
+                        Text(text = "Product Cost")
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(10.dp))
+                //image adding------------------>
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.Center
+
+                    ) {
+
+                        Column(
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            AsyncImage(
+                                model = selectedURI,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxWidth(0.5f)
+                                    .height(140.dp)
+                                    .border(2.dp, Color.Red),
+                                contentScale = ContentScale.Crop
+
+                                )
+
+
+                            Button(onClick = {
+                                        galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                            }) {
+                                Text(text = "ADD IMAGE FOR YOUR PRODUCT")
+                            }
+                        }
+                    }
+                //<------------------image adding
+                Spacer(modifier = Modifier.height(10.dp))
+
+                Row(
+
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    modifier = Modifier.fillMaxWidth()
+
+                ) {
+                    Button(
+                        onClick = {
+
+                            ui_viewModel.makeAddProductDialogueCardHidden()
+
+                        },
+                        //modifier=Modifier.weight(1f)
+                    ) {
+                        Text(text = "BACK")
 
                     }
 
-                },
+                    Button(
+                        onClick = {
 
-                label = {
-                    Text(text = "Product Cost")
-                }
-            )
+                            var sellerId = fireBaseAuthViewModel.auth.currentUser?.uid
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-
-                horizontalArrangement = Arrangement.SpaceEvenly,
-                modifier = Modifier.fillMaxWidth()
-
-            ) {
-                Button(
-                    onClick = {
-
-                        ui_viewModel.makeAddProductDialogueCardHidden()
-
-                    },
-                    //modifier=Modifier.weight(1f)
-                ) {
-                    Text(text = "BACK")
-
-                }
-
-                Button(
-                    onClick = {
-
-                        var sellerId = fireBaseAuthViewModel.auth.currentUser?.uid
-
-                        if (sellerId != null) {
-                            fireStoreViewModel.addProductsIntoDB(pname = pName, pcost = pCost, sellerId = sellerId)
-                        }
-
-                       ui_viewModel.makeAddProductDialogueCardHidden()
+                            if (sellerId != null) {
 
 
-                    },
-                    // modifier=Modifier.weight(1f)
+                                    imageViewModel.uploadImageAndSaveProduct(
+                                        name = pName,
+                                        price = pCost,
+                                        imageUri = selectedURI,
+                                        sellerId = sellerId,
+                                        fireStoreViewModel = fireStoreViewModel
 
-                ) {
-                    Text(text = "ADD")
+                                    )
 
+
+                            }
+
+                            ui_viewModel.makeAddProductDialogueCardHidden()
+
+
+                        },
+                        // modifier=Modifier.weight(1f)
+
+                    ) {
+                        Text(text = "ADD")
+
+                    }
                 }
             }
 

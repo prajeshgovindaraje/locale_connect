@@ -3,6 +3,7 @@ package com.example.video_game_collections.Screens
 
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.annotation.Size
 import androidx.compose.foundation.clickable
@@ -320,6 +321,8 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
             }
             Button(onClick = {
 
+                Log.i("response","sign in clicked ${role}")
+
                 if(role == "seller"){
                     viewModel.siginInUser(
                         userName = username,
@@ -330,7 +333,14 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
                         shopName = shopname
                     )
                 }else if(role == "customer"){
-                    viewModel.siginInUser(username,email, password, role,null,null)
+                    viewModel.siginInUser(
+                        userName = username,
+                        email = email,
+                        password = password,
+                        role = role,
+                        shopType = null,
+                        shopName = null
+                    )
                 }
 
             },

@@ -40,6 +40,7 @@ fun loginScreen(navController: NavController, fireBaseAuthViewModel: fireBaseAut
         mutableStateOf("")
     }
 
+
     val observedLoginStatus  = fireBaseAuthViewModel.loginStatusState.observeAsState()
 
     Log.i("response", fireBaseAuthViewModel.auth.currentUser?.email.toString())
