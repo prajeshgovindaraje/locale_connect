@@ -284,6 +284,7 @@ fun sellerScreen(
 
         if(observedAddProductDialogueCardState.value == true){
             addProductDialogueCard(
+                context = context,
                 fireStoreViewModel = fireStoreViewModel,
                 ui_viewModel = ui_viewModel,
                 fireBaseAuthViewModel = fireBaseAuthViewModel,
@@ -298,7 +299,8 @@ fun sellerScreen(
 
 @Composable
 fun addProductDialogueCard(
-    modifier: Modifier = Modifier,
+
+    context: Context,
     fireStoreViewModel: fireStoreViewModel,
     ui_viewModel: UI_ViewModel,
     fireBaseAuthViewModel: fireBaseAuthViewModel,
@@ -445,6 +447,7 @@ fun addProductDialogueCard(
 
 
                                     imageViewModel.uploadImageAndSaveProduct(
+                                        context = context,
                                         name = pName,
                                         price = pCost,
                                         imageUri = selectedURI,

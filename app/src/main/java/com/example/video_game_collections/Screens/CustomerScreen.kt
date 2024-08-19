@@ -85,10 +85,9 @@ fun cutomerScreen(
     var permissionLauncher = locationPermissionLauncher(navController)
 
     LaunchedEffect(null) {
-        fireBaseAuthViewModel.auth.currentUser?.let {
-            fireStoreViewModel.displayAllShopsForCustomer(
-                it.uid)
-        }
+
+
+
     }
     //----------------location
     LaunchedEffect(
@@ -102,6 +101,8 @@ fun cutomerScreen(
             //is loginStatus.Error -> TODO()
             is loginStatus.LoggedIn -> {
 
+
+                //location
                 if (obserevedLocationPermissionState.value == true && obseveredLocationSettingsState.value == true) {
                     Log.i("getlocation", "we can get ra")
                     locationViewModel.getLastKnownLocation(context) {
@@ -123,6 +124,7 @@ fun cutomerScreen(
                 }
 
 
+                //location
                 locationViewModel.checkLocationSettings(context, settingsLauncher) {
                     locationViewModel.checkLocationPermission(context, permissionLauncher) {
                         Log.i("locationresponse", obserevedLocationPermissionState.value.toString())
@@ -184,7 +186,7 @@ fun cutomerScreen(
 
                                 fireStoreViewModel.displayAllProductsBySeller(it.userID)
 
-                                  navController.navigate(allProductsBySellerPage)
+                                  navController.navigate(allProductsForCustomerByThisSellerPage)
 
                         },
                         modifier = Modifier.height(250.dp).padding(10.dp),
@@ -221,6 +223,14 @@ fun cutomerScreen(
 
                 Text(text = "click me view all available products")
 
+            }
+
+            TextButton(onClick = {
+
+                navController.navigate(myOrdersPage)
+
+            }) {
+                Text(text = "My Orders")
             }
 
 

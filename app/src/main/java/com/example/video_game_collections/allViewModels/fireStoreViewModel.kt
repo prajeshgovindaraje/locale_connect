@@ -1,6 +1,8 @@
 package com.example.video_game_collections.allViewModels
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -45,29 +47,104 @@ class fireStoreViewModel : ViewModel() {
                         .update(
                             "location",locationList
                         )
+                        .addOnSuccessListener {
+
+                            //displaying available shops for user only after getting the location
+                            displayAllShopsForCustomer(userID)
+                        }
                 }
             }
     }
 
 
-    fun addProductsIntoDB( pname : String, pcost : Double, sellerId : String, imageURL : String? ){
 
-            var tempProductModel = productModel(
-                pName = pname,
-                pCost = pcost,
-                sellerID = sellerId,
-                imageURL = imageURL
-            )
+    fun deleteFromdb(pName:String,context:Context, sellerID:String){
 
+
+        db.collection(productsCollection)
+            .whereEqualTo("sellerID",sellerID)
+            .whereEqualTo("pname",pName)
+            .addSnapshotListener { value, error ->
+
+                //for loop is avoided because only one item can match the give whereQuery
+                if (value != null && !value.isEmpty) {
+                    val documentID = value.documents[0].id
+                    db.collection(productsCollection).document(documentID).delete()
+                }
+
+
+            }
+
+
+    }
+
+
+
+    fun addProductsIntoDB( pname : String, pcost : Double, sellerId : String, imageURL : String?,context : Context){
+        // check for duplicate product names
+        Log.i("duplicateProduct","runs")
+        var isDuplicatePresent = false
             db.collection(productsCollection)
-                .add(tempProductModel)
-                .addOnSuccessListener {
-                    Log.i("response","producted added by seller is added")
-                }
-                .addOnFailureListener {
+                .whereEqualTo("sellerID",sellerId)
+                .get()
+                .addOnSuccessListener {products ->
 
-                    Log.i("response","${it.message}")
+
+                    if (products != null) {
+                        for(product  in products){
+                            Log.i("duplicateProduct","${product["pname"]} - ${pname}")
+                            if(product["pname"].toString() == pname){
+                                isDuplicatePresent = true
+                                Toast.makeText(context,"product added failed",Toast.LENGTH_LONG).show()
+
+
+
+
+                            }
+
+                        }
+
+
+                        if(isDuplicatePresent == false){
+                            var tempProductModel = productModel(
+                                pName = pname,
+                                pCost = pcost,
+                                sellerID = sellerId,
+                                imageURL = imageURL
+                            )
+
+                            db.collection(productsCollection)
+                                .add(tempProductModel)
+                                .addOnSuccessListener {
+                                    Log.i("duplicateProduct","producted added by seller is added")
+                                    Toast.makeText(context,"product  added",Toast.LENGTH_LONG).show()
+
+                                }
+                                .addOnFailureListener {
+
+                                    Log.i("duplicateProduct","${it.message}")
+                                }
+                        }
+
+
+
+
+
+
+
+
+                    }
                 }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -210,7 +287,7 @@ class fireStoreViewModel : ViewModel() {
 
         db.collection("users").document(userId).addSnapshotListener { value, error ->
             location = value?.get("location") as List<Double>
-            Log.i("response","${location}")
+            Log.i("productsforcustomer","${location}")
         }
 
 
@@ -224,7 +301,7 @@ class fireStoreViewModel : ViewModel() {
 
 
                     for(seller in sellers){
-                        // Log.i("productsforcustomer",it["email"].toString())
+                         Log.i("productsforcustomer",seller["email"].toString())
 
 
                         //locatin of the seller

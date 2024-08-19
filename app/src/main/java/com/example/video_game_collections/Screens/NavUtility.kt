@@ -2,6 +2,7 @@ package com.example.video_game_collections.Screens
 
 import android.content.Context
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -11,6 +12,7 @@ import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
 import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
+import com.example.video_game_collections.allViewModels.ordersViewModel
 import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
@@ -20,7 +22,9 @@ fun navUtitlity(
     fireStoreViewModel: fireStoreViewModel,
     ui_viewModel: UI_ViewModel,
     locationViewModel : locationViewModel,
-    imageViewModel: imageViewModel
+    imageViewModel: imageViewModel,
+    ordersViewModel: ordersViewModel,
+    modifier: Modifier
 
 ) {
     var navController = rememberNavController()
@@ -58,7 +62,7 @@ fun navUtitlity(
         }
 
         composable<allProductsBySellerPage> {
-            allProductsBySeller(fireStoreViewModel = fireStoreViewModel)
+            allProductsBySeller(fireStoreViewModel = fireStoreViewModel, authViewModel = viewModel)
         }
 
         composable<permissionDeniedPage> {
@@ -72,6 +76,31 @@ fun navUtitlity(
                 navController = navController,
                 fireStoreViewModel = fireStoreViewModel,
                 locationViewModel = locationViewModel
+            )
+        }
+
+        composable<allProductsForCustomerByThisSellerPage> {
+            allProductsForCustomerByThisSeller(
+                fireStoreViewModel = fireStoreViewModel,
+                authViewModel = viewModel,
+                navController = navController,
+                ordersViewModel = ordersViewModel
+            )
+        }
+
+        composable<addToCartPage> {
+            addToCartScreen(
+                ordersViewModel = ordersViewModel,
+                navController = navController,
+                fireBaseAuthViewModel = viewModel
+            )
+        }
+
+        composable<myOrdersPage> {
+            myOrdersScreen(
+                ordersViewModel = ordersViewModel,
+                navController = navController,
+                fireBaseAuthViewModel = viewModel
             )
         }
 
@@ -112,4 +141,14 @@ object permissionDeniedPage
 
 @Serializable
 object allProductsForCustomerPage
+
+@Serializable
+object allProductsForCustomerByThisSellerPage
+
+
+@Serializable
+object addToCartPage
+
+@Serializable
+object myOrdersPage
 

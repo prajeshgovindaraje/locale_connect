@@ -132,11 +132,16 @@ class fireBaseAuthViewModel : ViewModel(){
 
     }
 
-    fun getShopName(callback:(String) -> Unit, userID : String){
+    fun getShopName( userID: String,callback:(String)-> Unit){
+
+        Log.i("shopName","isnide get shop fun")
 
         db.collection("users").document(userID).addSnapshotListener { value, error ->
 
+                    var shopName = value?.get("shopName").toString()
+            Log.i("shopName","got  shop name ${shopName}")
 
+            callback(shopName)
         }
 
     }

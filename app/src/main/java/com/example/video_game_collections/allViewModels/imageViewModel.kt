@@ -1,5 +1,6 @@
 package com.example.video_game_collections.allViewModels
 
+import android.content.Context
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.ViewModel
@@ -10,13 +11,14 @@ class imageViewModel : ViewModel(){
 
 
     fun uploadImageAndSaveProduct(
+        context: Context,
         name: String,
         price: Double,
         sellerId : String,
         imageUri: Uri?,
         fireStoreViewModel: fireStoreViewModel,
 
-    ) {
+        ) {
         // Obtain a FirebaseStorage instance
         val storageRef = FirebaseStorage.getInstance().reference
         val imagesRef = storageRef.child("product_images/${UUID.randomUUID()}.jpg")
@@ -29,14 +31,14 @@ class imageViewModel : ViewModel(){
                     taskSnapshot.storage.downloadUrl.addOnSuccessListener { uri ->
                         val imageUrl = uri.toString()
                         // Save the product data in Firestore
-                        fireStoreViewModel.addProductsIntoDB(name, price, sellerId=sellerId ,imageURL = imageUrl)
+                        fireStoreViewModel.addProductsIntoDB(name, price, sellerId=sellerId ,imageURL = imageUrl, context = context)
                     }
                 }
                 .addOnFailureListener { exception ->
                     Log.e("FirebaseStorage", "Image upload failed", exception)
                 }
         }else{
-            fireStoreViewModel.addProductsIntoDB(name, price, sellerId=sellerId ,imageURL = null)
+            fireStoreViewModel.addProductsIntoDB(name, price, sellerId=sellerId ,imageURL = null,context = context)
 
         }
     }
