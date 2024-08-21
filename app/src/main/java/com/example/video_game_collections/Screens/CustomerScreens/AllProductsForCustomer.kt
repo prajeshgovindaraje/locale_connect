@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.video_game_collections.Screens.NavigationPages
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
@@ -49,7 +50,9 @@ fun allProductsForCustomer(
 
 
     LaunchedEffect(null) {
-        fireBaseAuthViewModel.auth.currentUser?.let { fireStoreViewModel.displayAllProductsforCustomer(it.uid) }
+        fireBaseAuthViewModel.auth.currentUser?.let {
+            fireStoreViewModel.displayAllProductsforCustomer(it.uid)
+        }
 
     }
 
@@ -61,11 +64,7 @@ fun allProductsForCustomer(
         mutableStateOf(0)
     }
     
-    var shopName by remember {
-        
-        mutableStateOf("")
-        
-    }
+
 
     Box(
         modifier = Modifier.fillMaxSize(),
@@ -85,6 +84,11 @@ fun allProductsForCustomer(
                 columns = GridCells.Fixed(2)
             ) {
                 items(obserevedAllProductsForCustomerState.value){
+                    var shopName by remember {
+
+                        mutableStateOf("")
+
+                    }
                     
                     fireBaseAuthViewModel.getShopName(it.sellerID){
                         shopName = it
@@ -93,7 +97,11 @@ fun allProductsForCustomer(
 
 
                     Card(
-                        onClick = { /*TODO*/ },
+                        onClick = {
+                            fireStoreViewModel.displayAllProductsBySeller(it.sellerID)
+
+                            navController.navigate(NavigationPages.allProductsForCustomerByThisSellerPage)
+                                  },
                         modifier = Modifier.padding(10.dp)
                     ) {
                         Column(
@@ -107,29 +115,6 @@ fun allProductsForCustomer(
                             Text(text = "SHOP NAME: ${shopName}")
 
 
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceEvenly
-                            ) {
-                                IconButton(onClick = {
-                                    count++
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = null
-                                    )
-
-                                }
-                                Text(text = count.toString())
-                                IconButton(onClick = {
-                                    count--
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Default.Clear,
-                                        contentDescription = null
-                                    )
-
-                                }
-                            }
 
                         }
                     }

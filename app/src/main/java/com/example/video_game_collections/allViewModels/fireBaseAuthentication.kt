@@ -150,6 +150,20 @@ class fireBaseAuthViewModel : ViewModel(){
 
     }
 
+    fun getUserName( userID: String,callback:(String)-> Unit){
+
+        Log.i("username","isnide get user nme fun")
+
+        db.collection("users").document(userID).addSnapshotListener { value, error ->
+
+            var userName = value?.get("userName").toString()
+            Log.i("shopName","got  shop name ${userName}")
+
+            callback(userName)
+        }
+
+    }
+
     fun getShopImage( userID: String,callback:(String)-> Unit){
 
         Log.i("shopName","isnide get shop Imagefun")

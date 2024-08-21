@@ -1,4 +1,4 @@
-package com.example.video_game_collections.Screens
+package com.example.video_game_collections.Screens.CustomerScreens
 
 
 import android.util.Log
@@ -36,9 +36,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import com.example.video_game_collections.Screens.NavigationPages
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
-import com.example.video_game_collections.allViewModels.ordersViewModel
+import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
+import com.example.video_game_collections.dataModels.OrderStatus
 import com.example.video_game_collections.dataModels.productModel
 import com.example.video_game_collections.dataModels.productOrderModel
 
@@ -48,14 +50,14 @@ fun allProductsForCustomerByThisSeller(
     modifier: Modifier = Modifier,
     fireStoreViewModel: fireStoreViewModel,
     authViewModel: fireBaseAuthViewModel,
-    ordersViewModel: ordersViewModel
+    ordersCustomerSideViewModel: ordersCustomerSideViewModel
 ) {
 
     var observeAllProductsBySellerState = fireStoreViewModel.allProductsBySellerState.observeAsState(
         emptyList<productModel>()
     )
 
-    var observedProductsCountMapState = ordersViewModel.productsCountMapState.observeAsState(
+    var observedProductsCountMapState = ordersCustomerSideViewModel.productsCountMapState.observeAsState(
         emptyMap<String,Int>()
     )
 
@@ -69,9 +71,12 @@ fun allProductsForCustomerByThisSeller(
         mutableStateOf(mutableMapOf<String, Int>())
     }
 
+    var pID = ordersCustomerSideViewModel.generateRandomAlphanumericString(10)
+
+
     var buyerId = authViewModel.auth.currentUser?.uid
 
-    var obserevedTotalCost = ordersViewModel.totalCost.observeAsState()
+    var obserevedTotalCost = ordersCustomerSideViewModel.totalCost.observeAsState()
 
 
 
@@ -128,26 +133,28 @@ fun allProductsForCustomerByThisSeller(
                         ) {
                             IconButton(onClick = {
 
-                                var count = ordersViewModel.getCurrCount(it.pName)
+                                var count = ordersCustomerSideViewModel.getCurrCount(it.pName)
 
-                                ordersViewModel.incrementOrderCount(it.pName,count) // changes the obsereved map
-                                Log.i("orderIncDec","${ordersViewModel.getCurrCount(it.pName)} is ${it.pName}")
-
+                                ordersCustomerSideViewModel.incrementOrderCount(it.pName,count) // changes the obsereved map
+                                Log.i("orderIncDec","${ordersCustomerSideViewModel.getCurrCount(it.pName)} is ${it.pName}")
 
                                 var tempProductOrderModel = productOrderModel(
                                      pName = it.pName,
                                  pCost = it.pCost,
-                                 quantity  = ordersViewModel.getCurrCount(it.pName),
-                                 totalProductCost =  it.pCost*ordersViewModel.getCurrCount(it.pName),
+                                 quantity  = ordersCustomerSideViewModel.getCurrCount(it.pName),
+                                 totalProductCost =  it.pCost*ordersCustomerSideViewModel.getCurrCount(it.pName),
                                  sellerID = it.sellerID,
                                  imageURL  = it.imageURL,
-                                    buyerID = buyerId
+                                    buyerID = buyerId,
+                                    status = OrderStatus.PENDING,
+                                    pID = pID
+
 
                                 )
 
-                                ordersViewModel.addOrUpdateToProductsInCartList(tempProductOrderModel)
+                                ordersCustomerSideViewModel.addOrUpdateToProductsInCartList(tempProductOrderModel)
 
-                                ordersViewModel.addToTotalCost(it.pCost)
+                                ordersCustomerSideViewModel.addToTotalCost(it.pCost)
 
                             }) {
                                 Icon(
@@ -171,33 +178,36 @@ fun allProductsForCustomerByThisSeller(
 
                             IconButton(onClick = {
 
-                                var count = ordersViewModel.getCurrCount(it.pName)
+                                var count = ordersCustomerSideViewModel.getCurrCount(it.pName)
 
                                 // changes the obsereved map
                                 if(count > 0){
-                                    ordersViewModel.decrementCount(it.pName,count)
+                                    ordersCustomerSideViewModel.decrementCount(it.pName,count)
                                 }
-                                Log.i("orderIncDec","${ordersViewModel.getCurrCount(it.pName)} is ${it.pName}")
+                                Log.i("orderIncDec","${ordersCustomerSideViewModel.getCurrCount(it.pName)} is ${it.pName}")
 
                                 var tempProductOrderModel = productOrderModel(
                                     pName = it.pName,
                                     pCost = it.pCost,
-                                    quantity  = ordersViewModel.getCurrCount(it.pName),
-                                    totalProductCost =  it.pCost*ordersViewModel.getCurrCount(it.pName),
+                                    quantity  = ordersCustomerSideViewModel.getCurrCount(it.pName),
+                                    totalProductCost =  it.pCost*ordersCustomerSideViewModel.getCurrCount(it.pName),
                                     sellerID = it.sellerID,
                                     imageURL  = it.imageURL,
-                                    buyerID = buyerId
+                                    buyerID = buyerId,
+                                    status = OrderStatus.PENDING,
+                                    pID = pID
+
 
                                 )
 
-                                if(ordersViewModel.getCurrCount(it.pName) == 0){
-                                    ordersViewModel.removeProductsInCartList(tempProductOrderModel)
+                                if(ordersCustomerSideViewModel.getCurrCount(it.pName) == 0){
+                                    ordersCustomerSideViewModel.removeProductsInCartList(tempProductOrderModel)
                                 }else{
-                                    ordersViewModel.addOrUpdateToProductsInCartList(tempProductOrderModel)
+                                    ordersCustomerSideViewModel.addOrUpdateToProductsInCartList(tempProductOrderModel)
                                 }
 
-                                if(ordersViewModel.getCurrCount(it.pName) >= 0){
-                                    ordersViewModel.reduceFromTotalCost(it.pCost)
+                                if(ordersCustomerSideViewModel.getCurrCount(it.pName) >= 0){
+                                    ordersCustomerSideViewModel.reduceFromTotalCost(it.pCost)
 
                                 }
                             }) {

@@ -6,17 +6,15 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.video_game_collections.dataModels.productModel
+import com.example.video_game_collections.dataModels.OrderStatus
 import com.example.video_game_collections.dataModels.productOrderModel
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.ServerTimestamp
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
 
-class ordersViewModel : ViewModel(){
+class ordersCustomerSideViewModel : ViewModel(){
 
     var db = FirebaseFirestore.getInstance()
 
@@ -118,12 +116,14 @@ class ordersViewModel : ViewModel(){
             .joinToString("")
     }
 
+    //used while checkout button is clicked
     fun addIntoOrders(
         orderList: MutableList<productOrderModel>,
         totalCost: Double,
         context: Context,
         buyerID : String,
-        status : String
+        status : String,
+        sellerID : String,
     ){
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
@@ -135,7 +135,9 @@ class ordersViewModel : ViewModel(){
             "totalOrderCost" to totalCost,
             "buyerID" to buyerID,
             "timestamp" to currentTime,
-            "orderId" to orderID
+            "orderId" to orderID,
+            "sellerID" to sellerID,
+            "status" to status
         )
 
         db.collection("orders").add(orderDocument)
@@ -195,7 +197,10 @@ class ordersViewModel : ViewModel(){
         currentTime: String,
         buyerID: String,
         orderList : MutableList<Map<String,Any>>,
-        totalOrderCost : Double
+        totalOrderCost : Double,
+        status : String,
+        sellerID: String
+
     ){
 
         db.collection("orders")
@@ -236,6 +241,27 @@ class ordersViewModel : ViewModel(){
 
 
 
+    }
+
+    fun countStatus(
+        productsInOrderList:List<Map<String,Any>>,
+        onSuccess:(MutableList<Int>) -> Unit
+    ){
+        var totalProductsInTheOrder = productsInOrderList.size
+
+        var countList = mutableListOf(0,0,0)
+
+
+        for (product in productsInOrderList) {
+            when (product["status"]) {
+
+                OrderStatus.PENDING.toString() -> countList[0] = countList[0] + 1
+                OrderStatus.ACCEPTED.toString() -> countList[1] = countList[1] + 1
+                OrderStatus.REJECTED.toString() -> countList[2] = countList[2] + 1
+            }
+        }
+
+        onSuccess(countList)
     }
 
 
