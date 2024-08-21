@@ -11,8 +11,10 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.example.video_game_collections.Screens.BottomNavBar
 import com.example.video_game_collections.Screens.navUtitlity
 import com.example.video_game_collections.allViewModels.UI_ViewModel
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
@@ -34,7 +36,7 @@ class MainActivity : ComponentActivity() {
         val locationViewModel : locationViewModel by viewModels()
         val imageViewModel : imageViewModel by viewModels()
         val ordersViewModel : ordersViewModel by viewModels()
-
+        val BottomNavBar = BottomNavBar()
 
 
         enableEdgeToEdge()
@@ -42,16 +44,18 @@ class MainActivity : ComponentActivity() {
             var navController = rememberNavController()
 
             Video_Game_CollectionsTheme {
-
+                val observedLoginStatus = myViewModel.loginStatusState.observeAsState()
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-//                    topBar = {
-//                        CenterAlignedTopAppBar(
-//                            title = {Text(text = "This app mine")}
-//                        )
-//
-//                    }
+                    bottomBar = {
+                        BottomNavBar.SelectNavBar(
+                            myViewModel = myViewModel,
+                            observedLoginStatus = observedLoginStatus,
+                            navController = navController,
+                            viewModel = ui_viewModel
+                        )
+                    }
                 ) { innerPadding ->
 
                     navUtitlity(
