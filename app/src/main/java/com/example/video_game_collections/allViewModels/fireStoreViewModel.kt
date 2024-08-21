@@ -50,6 +50,7 @@ class fireStoreViewModel : ViewModel() {
                         .addOnSuccessListener {
 
                             //displaying available shops for user only after getting the location
+                            Log.i("productsforcustomer","dispoay called")
                             displayAllShopsForCustomer(userID)
                         }
                 }
@@ -287,7 +288,7 @@ class fireStoreViewModel : ViewModel() {
 
         db.collection("users").document(userId).addSnapshotListener { value, error ->
             location = value?.get("location") as List<Double>
-            Log.i("productsforcustomer","${location}")
+            Log.i("productsforcustomer","location: ${location}")
         }
 
 
@@ -309,21 +310,25 @@ class fireStoreViewModel : ViewModel() {
 
 
                         //checking customer and seller location
-                        if(location[0].roundToInt() == tempLocation[0].roundToInt() && location[1].roundToInt() == tempLocation[1].roundToInt()){
+                        if(tempLocation.isNotEmpty()){
+                            if(location[0].roundToInt() == tempLocation[0].roundToInt() && location[1].roundToInt() == tempLocation[1].roundToInt()){
 
-                            var tempShops = shopCardModel(
-                                shopName = seller["shopName"].toString(),
-                                shopType = seller["shopType"].toString(),
-                                userID = seller["userID"].toString(),
-                                shopImage = seller["shopImage"].toString()
+                                var tempShops = shopCardModel(
+                                    shopName = seller["shopName"].toString(),
+                                    shopType = seller["shopType"].toString(),
+                                    userID = seller["userID"].toString(),
+                                    shopImage = seller["shopImage"].toString()
 
-                            )
+                                )
 
-                            tempShopsListforCustomer.add(tempShops)
+                                tempShopsListforCustomer.add(tempShops)
 
 
+                            }
                         }
 
+
+                        Log.i("productsforcustomer","list : "+tempShopsListforCustomer.toString())
                         _allShopsForCustomerState.value = tempShopsListforCustomer.toMutableList()
 
 

@@ -135,9 +135,9 @@ fun permissionDeniedScreen(
        authViewModel.getUserRole {role->
 
            if(role == "seller"){
-               navController.navigate(sellerPage)
+               navController.navigate(NavigationPages.sellerPage)
            }else{
-               navController.navigate(customerPage)
+               navController.navigate(NavigationPages.customerPage)
            }
 
        }

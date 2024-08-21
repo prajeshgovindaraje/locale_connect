@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.net.Uri
+import android.os.Looper
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -14,6 +15,7 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.compose.ui.text.font.FontVariation
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -21,7 +23,9 @@ import androidx.lifecycle.ViewModel
 import androidx.navigation.NavController
 import com.example.video_game_collections.Screens.permissionDeniedScreen
 import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.SettingsClient
@@ -100,7 +104,7 @@ class locationViewModel: ViewModel() {
         ) == PackageManager.PERMISSION_GRANTED){
             Log.i("locationresponse","location permission  already granted ")
             _locationPermissionState.value = true
-            onDenied()
+           // onDenied()
 
         }else{
             if ((context as Activity).shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -144,19 +148,44 @@ class locationViewModel: ViewModel() {
 
     fun getLastKnownLocation(context: Context, onLocationReceived: (Location) -> Unit) {
         val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+        Log.i("locationresponse", "inside getLastKnownLocation")
 
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location ->
-                if (location != null) {
+        if (ActivityCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            val locationRequest = LocationRequest.create().apply {
+                interval = 10000 // Desired interval in milliseconds
+                fastestInterval = 5000 // Fastest interval in milliseconds
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY // High accuracy
+            }
 
-                    onLocationReceived(location)
-                } else {
-                    Log.i("Location", "Failed to retrieve location")
+            // Create a location callback to receive location updates
+            val locationCallback = object : LocationCallback() {
+                override fun onLocationResult(locationResult: LocationResult) {
+                    locationResult.lastLocation?.let { location ->
+                        // Pass the location to the provided callback function
+                        onLocationReceived(location)
+                        // Optionally, stop location updates if you only need one update
+                        fusedLocationClient.removeLocationUpdates(this)
+                    }
                 }
             }
-            .addOnFailureListener { e ->
-                Log.e("response", "Error getting location: ${e.message}")
-            }
+
+            // Request location updates
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+
+            )
+
+        }
+        else{
+            Log.i("locationresponse","oombe")
+        }
+
 
     }
 

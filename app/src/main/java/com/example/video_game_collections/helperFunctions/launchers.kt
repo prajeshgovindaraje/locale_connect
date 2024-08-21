@@ -12,7 +12,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavController
-import com.example.video_game_collections.Screens.permissionDeniedPage
+import com.example.video_game_collections.Screens.NavigationPages.permissionDeniedPage
 import com.example.video_game_collections.allViewModels.locationViewModel
 
 @Composable

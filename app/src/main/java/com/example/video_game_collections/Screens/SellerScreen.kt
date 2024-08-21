@@ -128,7 +128,7 @@ fun sellerScreen(
                         Log.i("locationresponse",obserevedLocationPermissionState.value.toString())
 
                         if(obserevedLocationPermissionState.value == false){
-                            navController.navigate(permissionDeniedPage)
+                            navController.navigate(NavigationPages.permissionDeniedPage)
                         }
 
 
@@ -139,7 +139,7 @@ fun sellerScreen(
 
             }
             is loginStatus.LoggedOut -> {
-                navController.navigate(loginPage)
+                navController.navigate(NavigationPages.loginPage)
             }
             else -> Unit
         }
@@ -262,7 +262,7 @@ fun sellerScreen(
                         it.uid)
                 }
 
-                navController.navigate(allProductsBySellerPage)
+                navController.navigate(NavigationPages.allProductsBySellerPage)
             }) {
                 Text(text = "See All Products")
             }

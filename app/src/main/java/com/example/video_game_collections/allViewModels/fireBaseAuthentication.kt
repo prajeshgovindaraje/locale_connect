@@ -69,6 +69,7 @@ class fireBaseAuthViewModel : ViewModel(){
         auth.createUserWithEmailAndPassword(email,password)
             .addOnSuccessListener {
                 Log.i("response","inside create user success")
+
                 var id = it.user?.uid
                 var tempUsersModel  = usersModel(
                     userID = id,
@@ -82,6 +83,8 @@ class fireBaseAuthViewModel : ViewModel(){
 
 
                 if (id != null) {
+
+
                     db.collection("users")
                         .document(id)
                         .set(tempUsersModel)
@@ -89,6 +92,7 @@ class fireBaseAuthViewModel : ViewModel(){
                             Log.i("response","inside into db success")
 
                         }
+
                 }
 
 
@@ -134,7 +138,7 @@ class fireBaseAuthViewModel : ViewModel(){
 
     fun getShopName( userID: String,callback:(String)-> Unit){
 
-        Log.i("shopName","isnide get shop fun")
+        Log.i("shopName","isnide get shop nme fun")
 
         db.collection("users").document(userID).addSnapshotListener { value, error ->
 
@@ -142,6 +146,20 @@ class fireBaseAuthViewModel : ViewModel(){
             Log.i("shopName","got  shop name ${shopName}")
 
             callback(shopName)
+        }
+
+    }
+
+    fun getShopImage( userID: String,callback:(String)-> Unit){
+
+        Log.i("shopName","isnide get shop Imagefun")
+
+        db.collection("users").document(userID).addSnapshotListener { value, error ->
+
+            var shopImage = value?.get("shopImage").toString()
+            Log.i("shopName","got  shop name ${shopImage}")
+
+            callback(shopImage)
         }
 
     }

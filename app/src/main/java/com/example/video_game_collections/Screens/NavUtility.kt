@@ -1,19 +1,24 @@
 package com.example.video_game_collections.Screens
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.video_game_collections.Screens.CustomerScreens.addToCartScreen
+import com.example.video_game_collections.Screens.CustomerScreens.allProductsForCustomer
+import com.example.video_game_collections.Screens.CustomerScreens.cutomerScreen
+import com.example.video_game_collections.Screens.CustomerScreens.displayProductsInCurrentOrder
+import com.example.video_game_collections.Screens.CustomerScreens.myOrdersScreen
 import com.example.video_game_collections.allViewModels.UI_ViewModel
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
 import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
 import com.example.video_game_collections.allViewModels.ordersViewModel
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Composable
@@ -24,22 +29,22 @@ fun navUtitlity(
     locationViewModel : locationViewModel,
     imageViewModel: imageViewModel,
     ordersViewModel: ordersViewModel,
+    navController: NavHostController,
     modifier: Modifier
 
 ) {
-    var navController = rememberNavController()
 
-    NavHost(navController = navController , startDestination = loginPage) {
+    NavHost(navController = navController , startDestination = NavigationPages.loginPage) {
 
-        composable<loginPage> {
+        composable<NavigationPages.loginPage> {
             loginScreen(navController,viewModel)
         }
 
-        composable<signUpPage> {
+        composable<NavigationPages.signUpPage> {
             signInScreen(navController,viewModel)
         }
 
-        composable<customerPage> {
+        composable<NavigationPages.customerPage> {
             cutomerScreen(
                 fireBaseAuthViewModel = viewModel,
                 navController = navController,
@@ -49,7 +54,7 @@ fun navUtitlity(
             )
         }
 
-        composable<sellerPage> {
+        composable<NavigationPages.sellerPage> {
             sellerScreen(
                 fireBaseAuthViewModel = viewModel,
                 navController = navController,
@@ -61,16 +66,16 @@ fun navUtitlity(
             )
         }
 
-        composable<allProductsBySellerPage> {
+        composable<NavigationPages.allProductsBySellerPage> {
             allProductsBySeller(fireStoreViewModel = fireStoreViewModel, authViewModel = viewModel)
         }
 
-        composable<permissionDeniedPage> {
+        composable<NavigationPages.permissionDeniedPage> {
             permissionDeniedScreen(locationViewModel,navController, authViewModel = viewModel)
 
         }
 
-        composable<allProductsForCustomerPage> {
+        composable<NavigationPages.allProductsForCustomerPage> {
             allProductsForCustomer(
                 fireBaseAuthViewModel = viewModel,
                 navController = navController,
@@ -79,7 +84,7 @@ fun navUtitlity(
             )
         }
 
-        composable<allProductsForCustomerByThisSellerPage> {
+        composable<NavigationPages.allProductsForCustomerByThisSellerPage> {
             allProductsForCustomerByThisSeller(
                 fireStoreViewModel = fireStoreViewModel,
                 authViewModel = viewModel,
@@ -88,7 +93,7 @@ fun navUtitlity(
             )
         }
 
-        composable<addToCartPage> {
+        composable<NavigationPages.addToCartPage> {
             addToCartScreen(
                 ordersViewModel = ordersViewModel,
                 navController = navController,
@@ -96,11 +101,21 @@ fun navUtitlity(
             )
         }
 
-        composable<myOrdersPage> {
+        composable<NavigationPages.myOrdersPage> {
             myOrdersScreen(
                 ordersViewModel = ordersViewModel,
                 navController = navController,
                 fireBaseAuthViewModel = viewModel
+            )
+        }
+
+        composable<NavigationPages.displayAllProductsInCurrentOrderPage> {
+            val args = it.toRoute<NavigationPages.displayAllProductsInCurrentOrderPage>()
+            displayProductsInCurrentOrder(
+                ordersViewModel = ordersViewModel,
+                totalOrderCost = args.totalOrderCost
+
+
             )
         }
 
@@ -111,44 +126,62 @@ fun navUtitlity(
 
 
 
-
-
 @Serializable
-object loginPage
+sealed class NavigationPages{
 
-@Serializable
-object signUpPage
 
-@Serializable
-object customerPage
 
-@Serializable
-object sellerPage
+    @Serializable
+    object loginPage
 
-@Serializable
-object allProductsBySellerPage
+    @Serializable
+    object signUpPage
 
-@Serializable
-data class productDescriptionPage(
+    @Serializable
+    object customerPage
+
+    @Serializable
+    object sellerPage
+
+    @Serializable
+    object allProductsBySellerPage
+
+    @Serializable
+    data class productDescriptionPage(
         val pName : String,
         val pCost : Int,
         val sellerId : String
 
-        )
+    )
 
-@Serializable
-object permissionDeniedPage
+    @Serializable
+    object permissionDeniedPage
 
-@Serializable
-object allProductsForCustomerPage
+    @Serializable
+    object allProductsForCustomerPage
 
-@Serializable
-object allProductsForCustomerByThisSellerPage
+    @Serializable
+    object allProductsForCustomerByThisSellerPage
 
 
-@Serializable
-object addToCartPage
+    @Serializable
+    object addToCartPage
 
-@Serializable
-object myOrdersPage
+    @Serializable
+    object myOrdersPage
+
+    @Serializable
+    data class displayAllProductsInCurrentOrderPage(
+        val totalOrderCost : String
+    )
+
+
+
+
+
+
+
+}
+
+
 

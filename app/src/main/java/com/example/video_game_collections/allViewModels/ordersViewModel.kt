@@ -10,6 +10,7 @@ import com.example.video_game_collections.dataModels.productModel
 import com.example.video_game_collections.dataModels.productOrderModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ServerTimestamp
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -32,9 +33,13 @@ class ordersViewModel : ViewModel(){
     private var _productsCountMapState = MutableLiveData<MutableMap<String,Int>>()
     var productsCountMapState : LiveData<MutableMap<String,Int>> = _productsCountMapState
 
-
+    //Represents Orders stored in DB
     private var _ordersMapState = MutableLiveData<MutableList<Map<String,Any>>>()
     var ordersMapState : LiveData<MutableList<Map<String,Any>>> = _ordersMapState
+
+    //used to display current products in a order from order page
+    private var _displayProductsInCurrentOrderListState = MutableLiveData<MutableList<Map<String,Any>>>()
+    var displayProductsInCurrentOrderListState : LiveData<MutableList<Map<String,Any>>> = _displayProductsInCurrentOrderListState
 
 
     var tempProductsInCartList = mutableListOf<productOrderModel>() //an empty list
@@ -106,23 +111,31 @@ class ordersViewModel : ViewModel(){
 
 
 
-
+    fun generateRandomAlphanumericString(length: Int): String {
+        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        return (1..length)
+            .map { chars.random() }
+            .joinToString("")
+    }
 
     fun addIntoOrders(
         orderList: MutableList<productOrderModel>,
         totalCost: Double,
         context: Context,
-        buyerID : String
+        buyerID : String,
+        status : String
     ){
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val currentTime = dateFormat.format(Date())
+        val orderID = generateRandomAlphanumericString(20)
 
         val orderDocument = mapOf(
             "orderList" to orderList,  // Store the list as a field
             "totalOrderCost" to totalCost,
             "buyerID" to buyerID,
             "timestamp" to currentTime,
+            "orderId" to orderID
         )
 
         db.collection("orders").add(orderDocument)
@@ -153,6 +166,8 @@ class ordersViewModel : ViewModel(){
             .get()
             .addOnSuccessListener {
 
+                tempOrderedProductMap.clear()
+
                 Log.i("orderProd","fetch  success")
 
 
@@ -163,6 +178,7 @@ class ordersViewModel : ViewModel(){
                     _ordersMapState.value = tempOrderedProductMap.toMutableList()
 
 
+
                 }
 
 
@@ -171,6 +187,63 @@ class ordersViewModel : ViewModel(){
                 Log.i("orderProd",it.message.toString())
             }
     }
+
+
+
+    fun deleteEntireOrder(
+        orderID: String,
+        currentTime: String,
+        buyerID: String,
+        orderList : MutableList<Map<String,Any>>,
+        totalOrderCost : Double
+    ){
+
+        db.collection("orders")
+            .whereEqualTo("orderId",orderID)
+            .get()
+            .addOnSuccessListener {
+
+                if(it != null && !it.isEmpty){
+
+                    tempOrderedProductMap.remove(it.documents[0].data)
+                    var docID = it.documents[0].id
+                    db.collection("orders").document(docID).delete()
+                        .addOnSuccessListener {
+                            Log.i("deleteOrder","before delete"+_ordersMapState.value.toString())
+
+                            _ordersMapState.value = tempOrderedProductMap.toMutableList()
+                            Log.i("deleteOrder","after delete"+_ordersMapState.value.toString())
+
+                        }
+                }
+
+            }
+
+
+    }
+
+
+
+
+    var tempDisplayProductsInCurrentOrderList = (mutableListOf<Map<String,Any>> ())
+    fun displayProductsInCurrentOrder(orderedList : MutableList<Map<String,Any>>){
+
+        tempDisplayProductsInCurrentOrderList.clear()
+
+        tempDisplayProductsInCurrentOrderList += orderedList
+
+        _displayProductsInCurrentOrderListState.value = tempDisplayProductsInCurrentOrderList.toMutableList()
+
+
+
+    }
+
+
+
+
+    
+
+
 
 
 

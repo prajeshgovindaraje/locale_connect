@@ -55,9 +55,9 @@ fun loginScreen(navController: NavController, fireBaseAuthViewModel: fireBaseAut
 
                 fireBaseAuthViewModel.getUserRole {role ->
                     if(role == "customer"){
-                        navController.navigate(customerPage)
+                        navController.navigate(NavigationPages.customerPage)
                     }else if(role == "seller"){
-                        navController.navigate(sellerPage)
+                        navController.navigate(NavigationPages.sellerPage)
                     }
                 }
 
@@ -131,7 +131,7 @@ fun loginScreen(navController: NavController, fireBaseAuthViewModel: fireBaseAut
             TextButton(
                 onClick = {
 
-                        navController.navigate(signUpPage)
+                        navController.navigate(NavigationPages.signUpPage)
 
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally)

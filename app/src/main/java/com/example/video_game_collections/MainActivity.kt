@@ -12,6 +12,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
 import com.example.video_game_collections.Screens.navUtitlity
 import com.example.video_game_collections.allViewModels.UI_ViewModel
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
@@ -35,9 +36,14 @@ class MainActivity : ComponentActivity() {
         val ordersViewModel : ordersViewModel by viewModels()
 
 
+
         enableEdgeToEdge()
         setContent {
+            var navController = rememberNavController()
+
             Video_Game_CollectionsTheme {
+
+
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
 //                    topBar = {
@@ -55,7 +61,8 @@ class MainActivity : ComponentActivity() {
                         locationViewModel,
                         ordersViewModel = ordersViewModel,
                         imageViewModel = imageViewModel,
-                        modifier = Modifier.padding( innerPadding)
+                        modifier = Modifier.padding( innerPadding),
+                        navController = navController
                     )
 
                 }
