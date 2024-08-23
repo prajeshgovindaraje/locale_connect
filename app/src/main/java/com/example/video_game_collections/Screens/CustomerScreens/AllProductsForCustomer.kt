@@ -84,6 +84,7 @@ fun allProductsForCustomer(
                 columns = GridCells.Fixed(2)
             ) {
                 items(obserevedAllProductsForCustomerState.value){
+
                     var shopName by remember {
 
                         mutableStateOf("")
@@ -98,7 +99,11 @@ fun allProductsForCustomer(
 
                     Card(
                         onClick = {
-                            fireStoreViewModel.displayAllProductsBySeller(it.sellerID)
+
+
+                            fireStoreViewModel.changeDisplayAllProductsBySellerOrder(it.pID)
+
+
 
                             navController.navigate(NavigationPages.allProductsForCustomerByThisSellerPage)
                                   },

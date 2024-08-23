@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,7 +52,12 @@ fun myOrdersScreen(
     val observedOrderedPoductsState = ordersCustomerSideViewModel.ordersMapState.observeAsState(emptyList<Map<String,Any>>())
 
     LaunchedEffect(observedOrderedPoductsState.value) {
-        var userID =  fireBaseAuthViewModel.auth.currentUser?.let { ordersCustomerSideViewModel.displayCurrentUserOrders(it.uid) }
+        Log.i("myOrdersScreen","in customer order "+observedOrderedPoductsState.value.toString())
+        var userID =  fireBaseAuthViewModel.auth.currentUser?.let {
+            ordersCustomerSideViewModel.displayCurrentUserOrders(it.uid)
+        }
+
+
 
 
 
@@ -85,6 +91,8 @@ fun myOrdersScreen(
 
 
                     items(observedOrderedPoductsState.value){
+                        var doc =  it["orderList"] as List<Map<String, Any>> // list of products in the order
+
 
                         Card(
                             modifier = Modifier.padding(8.dp),
@@ -102,7 +110,8 @@ fun myOrdersScreen(
                             }
                         ) {
                             Row {
-                                var doc =  it["orderList"] as List<Map<String, Any>> // list of products in the order
+
+
                                 var shopImageURL by remember{
                                     mutableStateOf("")
                                 }
@@ -127,13 +136,17 @@ fun myOrdersScreen(
                                         mutableStateOf("")
                                     }
 
-
                                     var sellerID = doc.get(0).get("sellerID").toString()
+                                    var countList by remember { mutableStateOf(listOf(0, 0, 0)) }
 
 
 
-                                            LaunchedEffect(sellerID) {
-                                                if (shopName.isEmpty()) {
+
+                                    LaunchedEffect(sellerID,doc,observedOrderedPoductsState.value) {
+                                        Log.i("myOrdersScreen","in customer order 2nd Launched  "+observedOrderedPoductsState.value.toString())
+
+
+                                        if (shopName.isEmpty()) {
                                                     fireBaseAuthViewModel.getShopName(sellerID) { name ->
                                                         shopName = name
                                                     }
@@ -141,6 +154,15 @@ fun myOrdersScreen(
                                                         shopImageURL = it
                                                     }
                                                 }
+
+
+                                        // Calculate status counts
+                                        ordersCustomerSideViewModel.countStatus(doc) {
+                                            countList = it
+                                        }
+
+
+
                                             }
 
 
@@ -180,18 +202,7 @@ fun myOrdersScreen(
 
                                         }
 
-                                        var countList by remember {
-                                            mutableStateOf(mutableListOf(0,0,0))
-                                        }
 
-
-                                        LaunchedEffect(countList) {
-                                             ordersCustomerSideViewModel.countStatus(doc){
-                                                 countList = it
-                                             }
-
-
-                                        }
 
                                         var totalProductsInTheOrder = doc.size
 

@@ -128,7 +128,8 @@ fun navUtitlity(
                 ordersCustomerSideViewModel = ordersCustomerSideViewModel,
                 totalOrderCost = args.totalOrderCost,
                 orderID = args.orderID,
-                ordersSellerSideViewModel = ordersSellerSideViewModel
+                ordersSellerSideViewModel = ordersSellerSideViewModel,
+                buyerID = args.buyerID
 
 
             )
@@ -204,7 +205,8 @@ sealed class NavigationPages{
     @Serializable
     data class display_All_Products_In_CurrentOrder_ForSeller_Page(
         val totalOrderCost : String,
-        val orderID : String
+        val orderID : String,
+        val buyerID : String
 
     )
 

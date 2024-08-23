@@ -81,7 +81,14 @@ class fireStoreViewModel : ViewModel() {
 
 
 
-    fun addProductsIntoDB( pname : String, pcost : Double, sellerId : String, imageURL : String?,context : Context){
+    fun addProductsIntoDB(
+        pname: String,
+        pcost: Double,
+        sellerId: String,
+        imageURL: String?,
+        context: Context,
+        pID : String
+    ){
         // check for duplicate product names
         Log.i("duplicateProduct","runs")
         var isDuplicatePresent = false
@@ -111,7 +118,8 @@ class fireStoreViewModel : ViewModel() {
                                 pName = pname,
                                 pCost = pcost,
                                 sellerID = sellerId,
-                                imageURL = imageURL
+                                imageURL = imageURL,
+                                pID = pID
                             )
 
                             db.collection(productsCollection)
@@ -152,40 +160,64 @@ class fireStoreViewModel : ViewModel() {
         }
 
 
-        var tempProductsListBySeller  = mutableListOf<productModel>()
-        fun displayAllProductsBySeller(userID : String){
+    var tempProductsListBySeller = mutableListOf<productModel>()
 
-            Log.i("response","inside display product by seller dfun ${userID}")
+    fun displayAllProductsBySeller(userID: String) {
+        Log.i("response", "inside display product by seller function ${userID}")
 
-            db.collection(productsCollection)
-                .whereEqualTo("sellerID",userID)
-                .addSnapshotListener { value, error ->
-                    Log.i("response","inside addSnap display product by seller dfun ${userID}")
+        db.collection(productsCollection)
+            .whereEqualTo("sellerID", userID)
+            .addSnapshotListener { value, error ->
+                Log.i("response", "inside addSnapshotListener display product by seller function ${userID}")
 
-                    if (value != null) {
-                        tempProductsListBySeller.clear()
+                if (value != null) {
+                    tempProductsListBySeller.clear()
 
-                        for(it in value){
+                    for (it in value) {
+                        val tempProductModel = productModel(
+                            pCost = it["pcost"].toString().toDouble(),
+                            pName = it["pname"].toString(),
+                            sellerID = it["sellerID"].toString(),
+                            imageURL = it["imageURL"].toString(),
+                            pID = it["pid"].toString()
+                        )
 
-                                    var tempProductModel = productModel(
-                                        pCost = it["pcost"].toString().toDouble(),
-                                        pName = it["pname"].toString(),
-                                        sellerID = it["sellerID"].toString(),
-                                        imageURL = it["imageURL"].toString()
-                                    )
+                        Log.i("response ",tempProductModel.pID)
 
-                                    tempProductsListBySeller.add(tempProductModel)
-
-
-
-                        }
+                        tempProductsListBySeller.add(tempProductModel)
                     }
-
-                    _allProductsBySellerState.value = tempProductsListBySeller.toMutableList()
-
                 }
 
+                _allProductsBySellerState.value = tempProductsListBySeller.toMutableList()
+            }
+    }
+
+    fun changeDisplayAllProductsBySellerOrder(pID: String) {
+        Log.i("changeOrder", "inside change function")
+
+        // Find the index of the product with the given pID
+        val index = tempProductsListBySeller.indexOfFirst { it.pID == pID }
+        Log.i("changeOrder", "Index of product with pID $pID: $index")
+
+        if (index != -1) {
+            // If the product is found, remove it from its current position
+            val product = tempProductsListBySeller.removeAt(index)
+            Log.i("changeOrder", "Product removed: $product")
+
+            // Add the product to the 0th index
+            tempProductsListBySeller.add(0, product)
+            Log.i("changeOrder", "Product moved to 0th index: $product")
+        } else {
+            Log.e("changeOrder", "Product with pID $pID not found!")
         }
+
+        // Update the state with the modified list
+        _allProductsBySellerState.value = tempProductsListBySeller.toMutableList()
+
+        Log.i("changeOrder", "Updated state with new order: $tempProductsListBySeller")
+    }
+
+
 
 
 
@@ -251,7 +283,8 @@ class fireStoreViewModel : ViewModel() {
                                                     pName = it["pname"].toString(),
                                                     pCost = it["pcost"].toString().toDouble(),
                                                     sellerID = it["sellerID"].toString(),
-                                                    imageURL = it["imageURL"].toString()
+                                                    imageURL = it["imageURL"].toString(),
+                                                    pID =  it["pID"].toString()
                                                 )
                                             )
                                             _allProductsForCustomerState.value = tempProductsListforCustomer.toMutableList()

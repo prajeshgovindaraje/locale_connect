@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.video_game_collections.dataModels.OrderStatus
 import com.example.video_game_collections.dataModels.productOrderModel
+import com.example.video_game_collections.helperFunctions.generateRandomID
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -109,12 +110,7 @@ class ordersCustomerSideViewModel : ViewModel(){
 
 
 
-    fun generateRandomAlphanumericString(length: Int): String {
-        val chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-        return (1..length)
-            .map { chars.random() }
-            .joinToString("")
-    }
+
 
     //used while checkout button is clicked
     fun addIntoOrders(
@@ -128,7 +124,7 @@ class ordersCustomerSideViewModel : ViewModel(){
 
         val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
         val currentTime = dateFormat.format(Date())
-        val orderID = generateRandomAlphanumericString(20)
+        val orderID = generateRandomID().generateRandomAlphanumericString(20)
 
         val orderDocument = mapOf(
             "orderList" to orderList,  // Store the list as a field
@@ -137,7 +133,7 @@ class ordersCustomerSideViewModel : ViewModel(){
             "timestamp" to currentTime,
             "orderId" to orderID,
             "sellerID" to sellerID,
-            "status" to status
+            "status" to status,
         )
 
         db.collection("orders").add(orderDocument)
@@ -165,29 +161,24 @@ class ordersCustomerSideViewModel : ViewModel(){
     ){
         db.collection("orders")
             .whereEqualTo("buyerID",buyerId)
-            .get()
-            .addOnSuccessListener {
-
+            .addSnapshotListener { value, error ->
                 tempOrderedProductMap.clear()
 
                 Log.i("orderProd","fetch  success")
 
 
-                for (doc in it){
-                    tempOrderedProductMap += doc.data as Map<String,Any>
-                    Log.i("orderProd","tempOrderedProductMap update  success")
+                if (value != null) {
+                    for (doc in value){
+                        tempOrderedProductMap += doc.data as Map<String,Any>
+                        Log.i("orderProd","tempOrderedProductMap update  success")
 
-                    _ordersMapState.value = tempOrderedProductMap.toMutableList()
+                        _ordersMapState.value = tempOrderedProductMap.toMutableList()
 
 
-
+                    }
                 }
-
-
             }
-            .addOnFailureListener {
-                Log.i("orderProd",it.message.toString())
-            }
+
     }
 
 
@@ -233,11 +224,26 @@ class ordersCustomerSideViewModel : ViewModel(){
     var tempDisplayProductsInCurrentOrderList = (mutableListOf<Map<String,Any>> ())
     fun displayProductsInCurrentOrder(orderedList : MutableList<Map<String,Any>>){
 
-        tempDisplayProductsInCurrentOrderList.clear()
+        db.collection("orders")
+            .whereEqualTo("orderList",orderedList)
+            .addSnapshotListener { value, error ->
+                tempDisplayProductsInCurrentOrderList.clear()
 
-        tempDisplayProductsInCurrentOrderList += orderedList
+                if(value != null && !value.isEmpty){
+                    var tempOrderMap = value.documents.get(0).data as MutableMap<String, Any>
+                    var tempProductList = tempOrderMap["orderList"]  as MutableList<MutableMap<String, Any>>
+                    tempDisplayProductsInCurrentOrderList += orderedList
 
-        _displayProductsInCurrentOrderListState.value = tempDisplayProductsInCurrentOrderList.toMutableList()
+                    _displayProductsInCurrentOrderListState.value = tempDisplayProductsInCurrentOrderList.toMutableList()
+
+                }
+
+
+
+            }
+
+
+
 
 
 
@@ -262,6 +268,55 @@ class ordersCustomerSideViewModel : ViewModel(){
         }
 
         onSuccess(countList)
+    }
+
+
+    fun changeStateToAcceptedOrRejected(buyerID: String,orderID:String,pID:String,status:OrderStatus,context: Context){
+        displayCurrentUserOrders(buyerID)
+        Log.i("changeStateToAccepted","inside state change")
+
+        db.collection("orders")
+            .whereEqualTo("orderId",orderID)
+            .get()
+            .addOnSuccessListener {
+
+
+
+
+                if(it != null && !it.isEmpty){
+                    var docID = it.documents.get(0).id
+
+                    var tempOrderMap = it.documents.get(0).data  as MutableMap<String, Any>
+                    Log.i("changeStateToAccepted","map = "+tempOrderMap.toString())
+                    var tempProductList = tempOrderMap["orderList"]  as MutableList<MutableMap<String, Any>>
+                    Log.i("changeStateToAccepted","list = "+tempProductList.toString())
+
+                    for (doc in tempProductList){
+                        if(doc.get("pid") == pID){
+                            doc["status"] = status
+                        }
+                    }
+
+
+                    // Update the document in Firestore with the properly formatted map
+
+
+                    db.collection("orders").document(docID)
+                        .update("orderList",tempProductList)
+
+                }else{
+                    Toast.makeText(context,"The Order has been cancelled by the user. Go back.",Toast.LENGTH_LONG).show()
+
+                }
+
+
+
+            }
+            .addOnFailureListener {
+                    Toast.makeText(context,"Network Error.",Toast.LENGTH_LONG).show()
+            }
+
+
     }
 
 

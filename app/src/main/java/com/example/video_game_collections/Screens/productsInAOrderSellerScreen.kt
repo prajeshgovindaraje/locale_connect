@@ -22,10 +22,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
@@ -38,12 +40,17 @@ fun displayProductsInCurrentOrderForSeller(
     ordersSellerSideViewModel:ordersSellerSideViewModel,
     ordersCustomerSideViewModel: ordersCustomerSideViewModel,
     totalOrderCost:String,
-    orderID : String
+    orderID : String,
+    buyerID : String
 ) {
 
     var observedDisplayProductsInCurrentOrderListState = ordersCustomerSideViewModel.displayProductsInCurrentOrderListState.observeAsState(
         emptyList<Map<String,Any>>()
     )
+
+    val context = LocalContext.current
+
+
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -88,8 +95,14 @@ fun displayProductsInCurrentOrderForSeller(
                                 Row {
                                     IconButton(onClick = {
 
-                                        ordersSellerSideViewModel.changeStateToAcceptedOrRejected(orderID,
-                                            it["pid"].toString(), OrderStatus.ACCEPTED
+                                        ordersCustomerSideViewModel.changeStateToAcceptedOrRejected(
+                                            orderID = orderID,
+                                            pID =  it["pid"].toString(),
+                                            status = OrderStatus.ACCEPTED,
+                                            buyerID =buyerID,
+                                            context = context
+
+
                                         )
 
                                     }) {
@@ -100,8 +113,13 @@ fun displayProductsInCurrentOrderForSeller(
                                     }
 
                                     IconButton(onClick = {
-                                        ordersSellerSideViewModel.changeStateToAcceptedOrRejected(orderID,
-                                            it["pid"].toString(), OrderStatus.REJECTED
+                                        ordersCustomerSideViewModel.changeStateToAcceptedOrRejected(
+                                            orderID = orderID,
+                                            pID =  it["pid"].toString(),
+                                            status = OrderStatus.REJECTED,
+                                            buyerID =buyerID,
+                                            context = context
+
                                         )
 
                                     }) {

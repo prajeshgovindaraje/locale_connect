@@ -61,6 +61,7 @@ import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
 import com.example.video_game_collections.allViewModels.loginStatus
 import com.example.video_game_collections.allViewModels.ordersSellerSideViewModel
+import com.example.video_game_collections.helperFunctions.generateRandomID
 import com.example.video_game_collections.helperFunctions.locationPermissionLauncher
 import com.example.video_game_collections.helperFunctions.locationSettingsLauncherFunction
 import com.google.android.gms.location.LocationServices
@@ -93,6 +94,9 @@ fun sellerScreen(
 
     //creating a launcher for location permission
     var permissionLauncher = locationPermissionLauncher(navController)
+
+    //ID for each product
+    val pID = generateRandomID().generateRandomAlphanumericString(21)
 
 
 
@@ -305,7 +309,8 @@ fun sellerScreen(
                 fireStoreViewModel = fireStoreViewModel,
                 ui_viewModel = ui_viewModel,
                 fireBaseAuthViewModel = fireBaseAuthViewModel,
-                imageViewModel = imageViewModel
+                imageViewModel = imageViewModel,
+                pID = pID
             )
         }
     }
@@ -321,7 +326,8 @@ fun addProductDialogueCard(
     fireStoreViewModel: fireStoreViewModel,
     ui_viewModel: UI_ViewModel,
     fireBaseAuthViewModel: fireBaseAuthViewModel,
-    imageViewModel: imageViewModel
+    imageViewModel: imageViewModel,
+    pID : String
 ) {
 
     var pName by remember {
@@ -469,7 +475,8 @@ fun addProductDialogueCard(
                                         price = pCost,
                                         imageUri = selectedURI,
                                         sellerId = sellerId,
-                                        fireStoreViewModel = fireStoreViewModel
+                                        fireStoreViewModel = fireStoreViewModel,
+                                        pID =  pID
 
                                     )
 

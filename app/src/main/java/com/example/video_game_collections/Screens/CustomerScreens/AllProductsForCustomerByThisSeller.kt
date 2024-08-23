@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -53,6 +54,7 @@ fun allProductsForCustomerByThisSeller(
     ordersCustomerSideViewModel: ordersCustomerSideViewModel
 ) {
 
+    
     var observeAllProductsBySellerState = fireStoreViewModel.allProductsBySellerState.observeAsState(
         emptyList<productModel>()
     )
@@ -71,7 +73,6 @@ fun allProductsForCustomerByThisSeller(
         mutableStateOf(mutableMapOf<String, Int>())
     }
 
-    var pID = ordersCustomerSideViewModel.generateRandomAlphanumericString(10)
 
 
     var buyerId = authViewModel.auth.currentUser?.uid
@@ -87,7 +88,7 @@ fun allProductsForCustomerByThisSeller(
         horizontalAlignment = Alignment.CenterHorizontally
     ){
         Text(text = "All products by  this seller")
-
+        Log.i("changeOrder","allProductsForCustomerByThisSeller pagw  "+observeAllProductsBySellerState.value.toString())
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             modifier = Modifier.fillMaxHeight(0.6f),
@@ -95,6 +96,7 @@ fun allProductsForCustomerByThisSeller(
         ) {
 
             items(observeAllProductsBySellerState.value){
+
                 Log.i("shopName"," inside your ")
 
 
@@ -147,7 +149,7 @@ fun allProductsForCustomerByThisSeller(
                                  imageURL  = it.imageURL,
                                     buyerID = buyerId,
                                     status = OrderStatus.PENDING,
-                                    pID = pID
+                                    pID = it.pID
 
 
                                 )
@@ -195,7 +197,7 @@ fun allProductsForCustomerByThisSeller(
                                     imageURL  = it.imageURL,
                                     buyerID = buyerId,
                                     status = OrderStatus.PENDING,
-                                    pID = pID
+                                    pID = it.pID
 
 
                                 )

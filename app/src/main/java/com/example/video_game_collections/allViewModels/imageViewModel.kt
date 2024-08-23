@@ -17,6 +17,7 @@ class imageViewModel : ViewModel(){
         sellerId : String,
         imageUri: Uri?,
         fireStoreViewModel: fireStoreViewModel,
+        pID : String
 
         ) {
         // Obtain a FirebaseStorage instance
@@ -31,14 +32,28 @@ class imageViewModel : ViewModel(){
                     taskSnapshot.storage.downloadUrl.addOnSuccessListener { uri ->
                         val imageUrl = uri.toString()
                         // Save the product data in Firestore
-                        fireStoreViewModel.addProductsIntoDB(name, price, sellerId=sellerId ,imageURL = imageUrl, context = context)
+                        fireStoreViewModel.addProductsIntoDB(
+                            name,
+                            price,
+                            sellerId = sellerId,
+                            imageURL = imageUrl,
+                            context = context,
+                            pID = pID
+                        )
                     }
                 }
                 .addOnFailureListener { exception ->
                     Log.e("FirebaseStorage", "Image upload failed", exception)
                 }
         }else{
-            fireStoreViewModel.addProductsIntoDB(name, price, sellerId=sellerId ,imageURL = null,context = context)
+            fireStoreViewModel.addProductsIntoDB(
+                pname = name,
+                pcost = price,
+                sellerId = sellerId,
+                imageURL = null,
+                context = context,
+                pID = pID
+            )
 
         }
     }

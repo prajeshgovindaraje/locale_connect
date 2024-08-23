@@ -99,7 +99,8 @@ fun sellerOrderScreen(
                                 navController.navigate(
                                     NavigationPages.display_All_Products_In_CurrentOrder_ForSeller_Page(
                                         totalOrderCost = it["totalOrderCost"].toString(),
-                                        orderID = it["orderId"].toString()
+                                        orderID = it["orderId"].toString(),
+                                        buyerID = it["buyerID"].toString()
                                     ))
 
                             }

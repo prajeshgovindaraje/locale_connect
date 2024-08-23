@@ -47,7 +47,7 @@ class fireBaseAuthViewModel : ViewModel(){
 
             }
             .addOnFailureListener {
-                Log.i("response","inside login failure")
+                Log.i("response","inside login failure ${it.message}")
 
                 _loginStatusState.value = loginStatus.LoggedOut
             }

@@ -7,7 +7,8 @@ data class productModel(
     val pName : String,
     val pCost : Double,
     val sellerID : String,
-    val imageURL : String?
+    val imageURL : String?,
+    val pID : String
 
 
 

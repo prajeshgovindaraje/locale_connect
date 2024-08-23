@@ -86,9 +86,12 @@ fun addToCartScreen(
 
                                 Column {
                                     Text(text = "Name: ${it.pName}")
+
+
                                     Text(text = "cost: ${it.pCost}")
                                     Text(text = "quantity: ${it.quantity}")
                                     Text(text = "totalCost: ${it.totalProductCost}")
+
 
                                 }
 
@@ -133,7 +136,8 @@ fun addToCartScreen(
                                 totalCost = observedTotalCost.value,
                                 buyerID = buyerID,
                                 status = "pending",
-                                sellerID = sellerID
+                                sellerID = sellerID,
+
 
 
                             )
