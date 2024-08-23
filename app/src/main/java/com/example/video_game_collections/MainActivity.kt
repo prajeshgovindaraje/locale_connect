@@ -7,13 +7,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
+import com.example.video_game_collections.ui.theme.Video_Game_CollectionsTheme
+
+
 import com.example.video_game_collections.Screens.BottomNavBar
 import com.example.video_game_collections.Screens.navUtitlity
 import com.example.video_game_collections.allViewModels.UI_ViewModel
@@ -23,7 +24,7 @@ import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
 import com.example.video_game_collections.allViewModels.ordersViewModel
 
-import com.example.video_game_collections.ui.theme.Video_Game_CollectionsTheme
+
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -43,7 +44,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             var navController = rememberNavController()
 
-            Video_Game_CollectionsTheme {
+            Video_Game_CollectionsTheme (){
                 val observedLoginStatus = myViewModel.loginStatusState.observeAsState()
 
                 Scaffold(

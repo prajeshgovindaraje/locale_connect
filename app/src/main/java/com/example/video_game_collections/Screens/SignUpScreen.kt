@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -28,6 +29,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
@@ -83,14 +85,7 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
     var expanded by remember {
         mutableStateOf(false)
     }
-    var textsize by remember {
-        mutableStateOf(androidx.compose.ui.geometry.Size.Zero)
-    }
-    val icon= if(expanded){
-        Icons.Filled.KeyboardArrowUp
-    } else {
-        Icons.Filled.ArrowDropDown
-    }
+
 
     val role = if(!state){
         "customer"
@@ -142,33 +137,23 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        Column {
+        Column(
+
+            horizontalAlignment = Alignment.CenterHorizontally
+        ){
             Text(
-                text = "SignUp Page",
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                style = TextStyle(
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    fontFamily = FontFamily.SansSerif
-                ),
-                color = Color.Green
+                text = "SignUp Page"
             )
 
             Spacer(modifier = Modifier.height(24.dp))
+
             OutlinedTextField(
                 value = username,
                 onValueChange = {
                     username = it
                 },
                 label = { Text(text = "Enter UserName") },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color.Green,
-                    unfocusedBorderColor = Color.Green,
-                    disabledBorderColor = Color.Green,
-                    focusedLabelColor = Color.Black,
-                    unfocusedLabelColor = Color.Black,
-                    disabledLabelColor = Color.Black
-                ),
+
                 keyboardOptions = KeyboardOptions.Default
             )
 
@@ -180,14 +165,8 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
                     email = it
                 },
                 label = { Text(text = "Enter Email") },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color.Green,
-                        unfocusedBorderColor = Color.Green,
-                        disabledBorderColor = Color.Green,
-                        focusedLabelColor = Color.Black,
-                        unfocusedLabelColor = Color.Green,
-                        disabledLabelColor = Color.Green
-            ),
+
+
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email
                 )
@@ -203,14 +182,7 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
                     password = it
                 },
                 label = { Text(text = "Enter Password") },
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    focusedBorderColor = Color.Green,
-                    unfocusedBorderColor = Color.Green,
-                    disabledBorderColor = Color.Green,
-                    focusedLabelColor = Color.Green,
-                    unfocusedLabelColor = Color.Green,
-                    disabledLabelColor = Color.Green
-                ),
+
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password
                 )
@@ -220,20 +192,16 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center,
-
+                modifier = Modifier.offset(x=(-8).dp)
             ){
-                Spacer(modifier = Modifier.width(30.dp))
+
 
                 Text(text = "Customer",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = FontFamily.SansSerif
-                    ),
+
                     color = if (!state){
-                        Color.Green
+                        MaterialTheme.colorScheme.tertiary
                     } else {
-                        Color.LightGray
+                        MaterialTheme.colorScheme.primary
                     }
                 )
                 Spacer(modifier = Modifier.width(20.dp))
@@ -242,28 +210,23 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
                     onCheckedChange = {
                         state = it
                     },
-
                     colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = Color.Green,
-                        uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = Color.Green,
+                        checkedTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                        uncheckedTrackColor = MaterialTheme.colorScheme.secondaryContainer,
+                        checkedThumbColor = MaterialTheme.colorScheme.primary,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.primary
                     )
                 )
 
 
                 Spacer(modifier = Modifier.width(20.dp))
                 Text(text = "Seller",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        fontFamily = FontFamily.SansSerif
-                    ),
                     color = if (state){
-                        Color.Green
+                        MaterialTheme.colorScheme.tertiary
                     } else {
-                        Color.LightGray
-                    })
+                        MaterialTheme.colorScheme.primary
+                    }
+                )
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -275,14 +238,7 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
                         shopname = it
                     },
                     label = { Text(text = "Enter ShopName") },
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = Color.Green,
-                        unfocusedBorderColor = Color.Green,
-                        disabledBorderColor = Color.Green,
-                        focusedLabelColor = Color.Green,
-                        unfocusedLabelColor = Color.Green,
-                        disabledLabelColor = Color.Green
-                    ),
+
                     keyboardOptions = KeyboardOptions.Default
                 )
 
@@ -296,14 +252,7 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
                         onValueChange = {},
                         readOnly = true,
                         trailingIcon = {ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            focusedBorderColor = Color.Green,
-                            unfocusedBorderColor = Color.Green,
-                            disabledBorderColor = Color.Green,
-                            focusedLabelColor = Color.Green,
-                            unfocusedLabelColor = Color.Green,
-                            disabledLabelColor = Color.Green
-                        )
+
                         )
                     ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded=false }) {
                         shoptype.forEachIndexed { index, text ->
@@ -345,9 +294,7 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
 
             },
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Green
-                )
+
             ) {
 
                 Text(text = "Sigin In")
@@ -362,11 +309,6 @@ fun signInScreen(navController: NavController, viewModel: fireBaseAuthViewModel)
 
                 },
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                colors = ButtonDefaults.buttonColors(
-                    contentColor = Color.Green, containerColor = Color.Transparent
-                )
-
-
             ) {
 
                 Text(text = "Already have an account ? head back to Login")

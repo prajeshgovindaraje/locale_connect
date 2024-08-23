@@ -27,13 +27,18 @@ import androidx.compose.material3.BottomAppBarDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -47,12 +52,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.Observer
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.video_game_collections.R
-import com.example.video_game_collections.ui.theme.GreenJC
 import com.example.video_game_collections.allViewModels.UI_ViewModel
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.loginStatus
+
 
 class BottomNavBar {
 
@@ -87,44 +95,78 @@ class BottomNavBar {
 
 
     @Composable
-    fun CustomerBNB(modifier: Modifier = Modifier,navController: NavHostController,viewModel: UI_ViewModel) {
-        var selectIndex by remember { mutableStateOf(viewModel.select) }
-        BottomAppBar(
-            containerColor = Color.Transparent,
-            modifier = Modifier.padding(bottom = 10.dp)
-        ) {
+    fun CustomerBNB(
+        modifier: Modifier = Modifier,
+        navController: NavHostController,
+        viewModel: UI_ViewModel,
+
+    ) {
+        // Observe the current back stack entry
+        val currentScreen by viewModel.currentScreen.collectAsState()
+
+        val selectedItemIndexState by remember {
+            derivedStateOf {
+                viewModel.listNavItems.indexOfFirst { it.route == currentScreen }
+                    .takeIf { it != -1 } ?: 0
+            }
+        }
+
+        var selectedItemIndex by remember { mutableStateOf(selectedItemIndexState) }
+
+        LaunchedEffect(currentScreen) {
+            selectedItemIndex = selectedItemIndexState
+        }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+
                     .height(80.dp)
                     .background(
-                        color = GreenJC,
+                        color = MaterialTheme.colorScheme.primaryContainer,
                         shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
                     )
-            ){
+            ) {
                 Row(
                     modifier = Modifier.fillMaxSize(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                     viewModel.listNavItems.forEachIndexed { index, navItem ->
+
+                    viewModel.listNavItems.forEachIndexed { index, navItem ->
+                        val isSelected = selectedItemIndex == index
                         Box(
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .weight(20f)
+                                .weight(5f)
                                 .clickable {
-                                    selectIndex = index
-                                    navController.navigate(navItem.page)
+                                    selectedItemIndex = index
+
+                                    when (navItem.route) {
+                                        is NavigationPages.customerPage -> navController.navigate(
+                                            NavigationPages.customerPage
+                                        )
+
+                                        is NavigationPages.addToCartPage -> navController.navigate(
+                                            NavigationPages.addToCartPage
+                                        )
+
+                                        is NavigationPages.myOrdersPage -> navController.navigate(
+                                            NavigationPages.myOrdersPage
+                                        )
+
+                                        else -> Unit
+                                    }
                                 },
                             contentAlignment = Alignment.Center
                         ) {
                             Column(
-                                if (selectIndex == index) Modifier.offset(y = (-8).dp) else Modifier,
+                                if (isSelected) Modifier.offset(y = (-12).dp) else Modifier,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
                                 Box(
                                     Modifier
                                         .background(
-                                            if (selectIndex == index) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                            if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
                                             CircleShape
                                         )
                                         .size(50.dp),
@@ -133,29 +175,29 @@ class BottomNavBar {
                                     Icon(
                                         painter = painterResource(navItem.icon),
                                         contentDescription = null,
-                                        modifier = Modifier.size(24.dp),
-                                        tint = if (selectIndex == index) Color.Black else Color.White
+                                        modifier = Modifier.size(30.dp),
+                                        tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary
                                     )
                                 }
-                                AnimatedVisibility(selectIndex == index) {
+                                AnimatedVisibility(isSelected) {
                                     Text(
                                         text = navItem.title,
                                         modifier = Modifier.padding(top = 4.dp),
-                                        fontSize = 12.sp
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.onPrimary
                                     )
                                 }
                             }
-
-
                         }
                     }
                 }
-
             }
 
-        }
-
     }
+
+
+
+
     @Composable
     fun SellerBNB(modifier: Modifier = Modifier,navController: NavHostController, viewModel: UI_ViewModel) {
 
