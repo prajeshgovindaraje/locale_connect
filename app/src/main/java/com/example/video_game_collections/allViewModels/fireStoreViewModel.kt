@@ -1,5 +1,6 @@
 package com.example.video_game_collections.allViewModels
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
@@ -81,6 +82,7 @@ class fireStoreViewModel : ViewModel() {
 
 
 
+=======
     fun addProductsIntoDB(
         pname: String,
         pcost: Double,
@@ -351,7 +353,6 @@ class fireStoreViewModel : ViewModel() {
                                     shopType = seller["shopType"].toString(),
                                     userID = seller["userID"].toString(),
                                     shopImage = seller["shopImage"].toString()
-
                                 )
 
                                 tempShopsListforCustomer.add(tempShops)

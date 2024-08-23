@@ -1,10 +1,14 @@
 package com.example.video_game_collections.Screens
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+=======
 import androidx.navigation.toRoute
 import com.example.video_game_collections.Screens.CustomerScreens.addToCartScreen
 import com.example.video_game_collections.Screens.CustomerScreens.allProductsForCustomer
@@ -20,6 +24,7 @@ import com.example.video_game_collections.allViewModels.locationViewModel
 import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
 import com.example.video_game_collections.allViewModels.ordersSellerSideViewModel
 import kotlinx.serialization.Serializable
+import okhttp3.Route
 
 @Composable
 fun navUtitlity(
@@ -46,12 +51,13 @@ fun navUtitlity(
         }
 
         composable<NavigationPages.customerPage> {
+            ui_viewModel.updateCurrentScreen(NavigationPages.customerPage)
             cutomerScreen(
                 fireBaseAuthViewModel = viewModel,
                 navController = navController,
                 fireStoreViewModel = fireStoreViewModel,
-                locationViewModel = locationViewModel
-
+                locationViewModel = locationViewModel,
+                viewModel = ui_viewModel
             )
         }
 
@@ -97,6 +103,7 @@ fun navUtitlity(
         }
 
         composable<NavigationPages.addToCartPage> {
+            ui_viewModel.updateCurrentScreen(NavigationPages.addToCartPage)
             addToCartScreen(
                 ordersCustomerSideViewModel = ordersCustomerSideViewModel,
                 navController = navController,
@@ -104,7 +111,8 @@ fun navUtitlity(
             )
         }
 
-        composable<NavigationPages.myOrdersPage> {
+        composable<NavigationPages.myOrdersPage>{
+            ui_viewModel.updateCurrentScreen(NavigationPages.myOrdersPage)
             myOrdersScreen(
                 ordersCustomerSideViewModel = ordersCustomerSideViewModel,
                 navController = navController,
@@ -154,7 +162,7 @@ fun navUtitlity(
 
 
 @Serializable
-sealed class NavigationPages{
+sealed class NavigationPages(){
 
 
 
@@ -165,7 +173,7 @@ sealed class NavigationPages{
     object signUpPage
 
     @Serializable
-    object customerPage
+    object customerPage:NavigationPages()
 
     @Serializable
     object sellerPage
@@ -185,23 +193,24 @@ sealed class NavigationPages{
     object permissionDeniedPage
 
     @Serializable
-    object allProductsForCustomerPage
+    object allProductsForCustomerPage:NavigationPages()
 
     @Serializable
     object allProductsForCustomerByThisSellerPage
 
 
     @Serializable
-    object addToCartPage
+    object addToCartPage:NavigationPages()
 
     @Serializable
-    object myOrdersPage
+    object myOrdersPage:NavigationPages()
 
     @Serializable
     data class display_All_Products_In_CurrentOrder_ForCustomer_Page(
         val totalOrderCost : String
     )
-
+    
+    =======
     @Serializable
     data class display_All_Products_In_CurrentOrder_ForSeller_Page(
         val totalOrderCost : String,
@@ -215,13 +224,12 @@ sealed class NavigationPages{
     @Serializable
     object sellerOrderScreenPage
 
-
-
-
-
-
-
 }
+
+
+
+
+
 
 
 
