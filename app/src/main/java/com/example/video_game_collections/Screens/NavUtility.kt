@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-=======
 import androidx.navigation.toRoute
 import com.example.video_game_collections.Screens.CustomerScreens.addToCartScreen
 import com.example.video_game_collections.Screens.CustomerScreens.allProductsForCustomer
@@ -210,7 +209,7 @@ sealed class NavigationPages(){
         val totalOrderCost : String
     )
     
-    =======
+
     @Serializable
     data class display_All_Products_In_CurrentOrder_ForSeller_Page(
         val totalOrderCost : String,

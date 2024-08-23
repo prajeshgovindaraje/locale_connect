@@ -22,8 +22,8 @@ import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
 import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
-import com.example.video_game_collections.allViewModels.ordersViewModel
-
+import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
+import com.example.video_game_collections.allViewModels.ordersSellerSideViewModel
 
 
 class MainActivity : ComponentActivity() {
@@ -36,7 +36,8 @@ class MainActivity : ComponentActivity() {
         val ui_viewModel : UI_ViewModel by viewModels()
         val locationViewModel : locationViewModel by viewModels()
         val imageViewModel : imageViewModel by viewModels()
-        val ordersViewModel : ordersViewModel by viewModels()
+        val ordersCustomerSideViewModel : ordersCustomerSideViewModel by viewModels()
+        val ordersSellerSideViewModel : ordersSellerSideViewModel by viewModels()
         val BottomNavBar = BottomNavBar()
 
 
@@ -60,11 +61,12 @@ class MainActivity : ComponentActivity() {
                 ) { innerPadding ->
 
                     navUtitlity(
-                        myViewModel,
-                        fireStoreViewModel,
-                        ui_viewModel,
-                        locationViewModel,
-                        ordersViewModel = ordersViewModel,
+                        viewModel = myViewModel,
+                        fireStoreViewModel = fireStoreViewModel,
+                        ui_viewModel = ui_viewModel,
+                        locationViewModel = locationViewModel,
+                        ordersCustomerSideViewModel = ordersCustomerSideViewModel,
+                        ordersSellerSideViewModel = ordersSellerSideViewModel,
                         imageViewModel = imageViewModel,
                         modifier = Modifier.padding( innerPadding),
                         navController = navController

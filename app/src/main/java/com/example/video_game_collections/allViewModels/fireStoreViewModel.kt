@@ -82,7 +82,7 @@ class fireStoreViewModel : ViewModel() {
 
 
 
-=======
+
     fun addProductsIntoDB(
         pname: String,
         pcost: Double,
