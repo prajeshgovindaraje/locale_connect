@@ -1,15 +1,22 @@
 package com.example.video_game_collections.allViewModels
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.video_game_collections.R
 import com.example.video_game_collections.Screens.NavigationPages
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import okhttp3.Route
 
 
 class UI_ViewModel : ViewModel() {
@@ -31,14 +38,16 @@ class UI_ViewModel : ViewModel() {
     }
 
 
-    var select = 0
 
-    val list = listOf(
-        Icons.Default.Home,
-        Icons.Default.ShoppingCart,
-        R.drawable.my_orders_icon,
-        Icons.Default.Person
-    )
+
+    private val _currentScreen = MutableStateFlow<NavigationPages?>(null)
+    val currentScreen: MutableStateFlow<NavigationPages?> get() = _currentScreen
+
+    fun updateCurrentScreen(screen: NavigationPages) {
+        _currentScreen.value = screen
+    }
+
+
     val listNavItems= listOf(
         NavItem(
             R.drawable.baseline_home_24,
@@ -65,7 +74,7 @@ class UI_ViewModel : ViewModel() {
     data class NavItem(
         @DrawableRes val icon: Int,
         val title:String,
-        val page: Any
+        val route: NavigationPages
     )
 
 
