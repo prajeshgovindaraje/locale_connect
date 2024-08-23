@@ -16,9 +16,6 @@ import com.example.video_game_collections.ui.theme.Video_Game_CollectionsTheme
 
 
 import com.example.video_game_collections.Screens.BottomNavBar
-=======
-import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
 import com.example.video_game_collections.Screens.navUtitlity
 import com.example.video_game_collections.allViewModels.UI_ViewModel
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
@@ -27,7 +24,6 @@ import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
 import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
 import com.example.video_game_collections.allViewModels.ordersSellerSideViewModel
-
 
 
 class MainActivity : ComponentActivity() {
@@ -42,7 +38,7 @@ class MainActivity : ComponentActivity() {
         val imageViewModel : imageViewModel by viewModels()
         val ordersCustomerSideViewModel : ordersCustomerSideViewModel by viewModels()
         val ordersSellerSideViewModel : ordersSellerSideViewModel by viewModels()
-
+        val BottomNavBar = BottomNavBar()
 
 
         enableEdgeToEdge()
@@ -51,29 +47,28 @@ class MainActivity : ComponentActivity() {
 
             Video_Game_CollectionsTheme (){
                 val observedLoginStatus = myViewModel.loginStatusState.observeAsState()
-=======
-         
-
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-//                    topBar = {
-//                        CenterAlignedTopAppBar(
-//                            title = {Text(text = "This app mine")}
-//                        )
-//
-//                    }
+                    bottomBar = {
+                        BottomNavBar.SelectNavBar(
+                            myViewModel = myViewModel,
+                            observedLoginStatus = observedLoginStatus,
+                            navController = navController,
+                            viewModel = ui_viewModel
+                        )
+                    }
                 ) { innerPadding ->
 
                     navUtitlity(
-                        myViewModel,
-                        fireStoreViewModel,
-                        ui_viewModel,
-                        locationViewModel,
+                        viewModel = myViewModel,
+                        fireStoreViewModel = fireStoreViewModel,
+                        ui_viewModel = ui_viewModel,
+                        locationViewModel = locationViewModel,
                         ordersCustomerSideViewModel = ordersCustomerSideViewModel,
+                        ordersSellerSideViewModel = ordersSellerSideViewModel,
                         imageViewModel = imageViewModel,
                         modifier = Modifier.padding( innerPadding),
-                        ordersSellerSideViewModel = ordersSellerSideViewModel,
                         navController = navController
                     )
 
