@@ -22,16 +22,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.example.video_game_collections.allViewModels.ordersViewModel
+import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun displayProductsInCurrentOrder(
-    ordersViewModel: ordersViewModel,
+    ordersCustomerSideViewModel: ordersCustomerSideViewModel,
     totalOrderCost:String
 ) {
 
-    var observedDisplayProductsInCurrentOrderListState = ordersViewModel.displayProductsInCurrentOrderListState.observeAsState(
+    var observedDisplayProductsInCurrentOrderListState = ordersCustomerSideViewModel.displayProductsInCurrentOrderListState.observeAsState(
         emptyList<Map<String,Any>>()
     )
     
@@ -74,6 +74,7 @@ fun displayProductsInCurrentOrder(
                                Text(text = "Cost: "+it["pcost"] )
                                Text(text = "Quantity: "+it["quantity"] )
                                Text(text = "TotalCost: "+it["totalProductCost"] )
+                               Text(text = "Status: "+it["status"])
 
                            }
                        }

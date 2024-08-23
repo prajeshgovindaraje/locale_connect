@@ -1,5 +1,6 @@
 package com.example.video_game_collections.Screens.CustomerScreens
 
+import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,12 +26,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
-import com.example.video_game_collections.allViewModels.ordersViewModel
+import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
 import com.example.video_game_collections.dataModels.productOrderModel
 
 @Composable
 fun addToCartScreen(
-    ordersViewModel: ordersViewModel,
+    ordersCustomerSideViewModel: ordersCustomerSideViewModel,
     fireBaseAuthViewModel: fireBaseAuthViewModel,
     navController: NavController
 ) {
@@ -38,8 +39,8 @@ fun addToCartScreen(
     val context = LocalContext.current
     val buyerID = fireBaseAuthViewModel.auth.currentUser?.uid
 
-    val observedProductsInCartState = ordersViewModel.productsInCartState.observeAsState(emptyList<productOrderModel>())
-    val observedTotalCost = ordersViewModel.totalCost.observeAsState(0.0)
+    val observedProductsInCartState = ordersCustomerSideViewModel.productsInCartState.observeAsState(emptyList<productOrderModel>())
+    val observedTotalCost = ordersCustomerSideViewModel.totalCost.observeAsState(0.0)
 
     Box(modifier = Modifier.fillMaxSize()){
 
@@ -85,9 +86,12 @@ fun addToCartScreen(
 
                                 Column {
                                     Text(text = "Name: ${it.pName}")
+
+
                                     Text(text = "cost: ${it.pCost}")
                                     Text(text = "quantity: ${it.quantity}")
                                     Text(text = "totalCost: ${it.totalProductCost}")
+
 
                                 }
 
@@ -123,15 +127,27 @@ fun addToCartScreen(
                     //add into orders collection
                     if (buyerID != null) {
 
-                        ordersViewModel.addIntoOrders(
-                            observedProductsInCartState.value.toMutableList(),
-                            context = context,
-                            totalCost = observedTotalCost.value,
-                            buyerID = buyerID,
-                            status = "pending",
+                        if(observedProductsInCartState.value.isNotEmpty()){
+                            var sellerID = observedProductsInCartState.value.get(0).sellerID
+
+                            ordersCustomerSideViewModel.addIntoOrders(
+                                observedProductsInCartState.value.toMutableList(),
+                                context = context,
+                                totalCost = observedTotalCost.value,
+                                buyerID = buyerID,
+                                status = "pending",
+                                sellerID = sellerID,
 
 
-                        )
+
+                            )
+
+                        }else{
+                            Toast.makeText(context,"NO PRODUCTS ARE SELECTED TO ADD",Toast.LENGTH_LONG).show()
+                        }
+
+
+
                     }
 
 

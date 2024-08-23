@@ -1,5 +1,7 @@
 package com.example.video_game_collections.dataModels
 
+import kotlinx.serialization.Serializable
+
 data class productOrderModel(
 
     val pName : String,
@@ -8,7 +10,9 @@ data class productOrderModel(
     val totalProductCost : Double,
     val sellerID : String,
     val buyerID : String?,
-    val imageURL : String?
+    val imageURL : String?,
+    var status : OrderStatus,
+    var pID : String
 
 
 
@@ -16,6 +20,7 @@ data class productOrderModel(
 
 ){
      override fun equals(other: Any?): Boolean {
+
 
          if (other !is productOrderModel) return false
 
@@ -27,3 +32,15 @@ data class productOrderModel(
 
     }
 }
+
+
+
+
+enum class OrderStatus {
+    PENDING,
+    ACCEPTED,
+    REJECTED
+}
+
+
+

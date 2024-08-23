@@ -3,15 +3,16 @@ package com.example.video_game_collections.Screens
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+=======
 import androidx.navigation.toRoute
 import com.example.video_game_collections.Screens.CustomerScreens.addToCartScreen
 import com.example.video_game_collections.Screens.CustomerScreens.allProductsForCustomer
+import com.example.video_game_collections.Screens.CustomerScreens.allProductsForCustomerByThisSeller
 import com.example.video_game_collections.Screens.CustomerScreens.cutomerScreen
 import com.example.video_game_collections.Screens.CustomerScreens.displayProductsInCurrentOrder
 import com.example.video_game_collections.Screens.CustomerScreens.myOrdersScreen
@@ -20,7 +21,8 @@ import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
 import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
-import com.example.video_game_collections.allViewModels.ordersViewModel
+import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
+import com.example.video_game_collections.allViewModels.ordersSellerSideViewModel
 import kotlinx.serialization.Serializable
 import okhttp3.Route
 
@@ -31,8 +33,9 @@ fun navUtitlity(
     ui_viewModel: UI_ViewModel,
     locationViewModel : locationViewModel,
     imageViewModel: imageViewModel,
-    ordersViewModel: ordersViewModel,
+    ordersCustomerSideViewModel: ordersCustomerSideViewModel,
     navController: NavHostController,
+    ordersSellerSideViewModel:ordersSellerSideViewModel,
     modifier: Modifier
 
 ) {
@@ -65,7 +68,9 @@ fun navUtitlity(
                 fireStoreViewModel = fireStoreViewModel,
                 ui_viewModel = ui_viewModel,
                 locationViewModel = locationViewModel,
-                imageViewModel = imageViewModel
+                imageViewModel = imageViewModel,
+                ordersSellerSideViewModel = ordersSellerSideViewModel
+
 
             )
         }
@@ -93,14 +98,14 @@ fun navUtitlity(
                 fireStoreViewModel = fireStoreViewModel,
                 authViewModel = viewModel,
                 navController = navController,
-                ordersViewModel = ordersViewModel
+                ordersCustomerSideViewModel = ordersCustomerSideViewModel
             )
         }
 
         composable<NavigationPages.addToCartPage> {
             ui_viewModel.updateCurrentScreen(NavigationPages.addToCartPage)
             addToCartScreen(
-                ordersViewModel = ordersViewModel,
+                ordersCustomerSideViewModel = ordersCustomerSideViewModel,
                 navController = navController,
                 fireBaseAuthViewModel = viewModel
             )
@@ -109,18 +114,42 @@ fun navUtitlity(
         composable<NavigationPages.myOrdersPage>{
             ui_viewModel.updateCurrentScreen(NavigationPages.myOrdersPage)
             myOrdersScreen(
-                ordersViewModel = ordersViewModel,
+                ordersCustomerSideViewModel = ordersCustomerSideViewModel,
                 navController = navController,
                 fireBaseAuthViewModel = viewModel
             )
         }
 
-        composable<NavigationPages.displayAllProductsInCurrentOrderPage> {
-            val args = it.toRoute<NavigationPages.displayAllProductsInCurrentOrderPage>()
+        composable<NavigationPages.display_All_Products_In_CurrentOrder_ForCustomer_Page> {
+            val args = it.toRoute<NavigationPages.display_All_Products_In_CurrentOrder_ForCustomer_Page>()
             displayProductsInCurrentOrder(
-                ordersViewModel = ordersViewModel,
+                ordersCustomerSideViewModel = ordersCustomerSideViewModel,
                 totalOrderCost = args.totalOrderCost
 
+
+            )
+        }
+
+        composable<NavigationPages.display_All_Products_In_CurrentOrder_ForSeller_Page> {
+            val args = it.toRoute<NavigationPages.display_All_Products_In_CurrentOrder_ForSeller_Page>()
+            displayProductsInCurrentOrderForSeller(
+                ordersCustomerSideViewModel = ordersCustomerSideViewModel,
+                totalOrderCost = args.totalOrderCost,
+                orderID = args.orderID,
+                ordersSellerSideViewModel = ordersSellerSideViewModel,
+                buyerID = args.buyerID
+
+
+            )
+        }
+
+        composable<NavigationPages.sellerOrderScreenPage> {
+            sellerOrderScreen(
+                ordersSellerSideViewModel = ordersSellerSideViewModel,
+                fireStoreViewModel = fireStoreViewModel,
+                fireBaseAuthViewModel = viewModel,
+                ordersCustomerSideViewModel= ordersCustomerSideViewModel,
+                navController = navController
 
             )
         }
@@ -177,11 +206,27 @@ sealed class NavigationPages(){
     object myOrdersPage:NavigationPages()
 
     @Serializable
-    data class displayAllProductsInCurrentOrderPage(
+    data class display_All_Products_In_CurrentOrder_ForCustomer_Page(
         val totalOrderCost : String
     )
+    
+    =======
+    @Serializable
+    data class display_All_Products_In_CurrentOrder_ForSeller_Page(
+        val totalOrderCost : String,
+        val orderID : String,
+        val buyerID : String
+
+    )
+
+
+
+    @Serializable
+    object sellerOrderScreenPage
 
 }
+
+
 
 
 
