@@ -60,6 +60,8 @@ import com.example.video_game_collections.allViewModels.fireStoreViewModel
 import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
 import com.example.video_game_collections.allViewModels.loginStatus
+import com.example.video_game_collections.allViewModels.ordersSellerSideViewModel
+import com.example.video_game_collections.helperFunctions.generateRandomID
 import com.example.video_game_collections.helperFunctions.locationPermissionLauncher
 import com.example.video_game_collections.helperFunctions.locationSettingsLauncherFunction
 import com.google.android.gms.location.LocationServices
@@ -74,13 +76,14 @@ fun sellerScreen(
     fireStoreViewModel: fireStoreViewModel,
     ui_viewModel: UI_ViewModel,
     locationViewModel: locationViewModel,
+    ordersSellerSideViewModel:ordersSellerSideViewModel,
     imageViewModel: imageViewModel
 ) {
 
     val observedAddProductDialogueCardState = ui_viewModel.addProductDialogueCardState.observeAsState(initial = false)
     val observedLoginStatus  = fireBaseAuthViewModel.loginStatusState.observeAsState()
 
-
+    val sellerID = fireBaseAuthViewModel.auth.currentUser?.uid
     val context = LocalContext.current
 
     val obseveredLocationSettingsState = locationViewModel.locationSettingsState.observeAsState()
@@ -91,6 +94,9 @@ fun sellerScreen(
 
     //creating a launcher for location permission
     var permissionLauncher = locationPermissionLauncher(navController)
+
+    //ID for each product
+    val pID = generateRandomID().generateRandomAlphanumericString(21)
 
 
 
@@ -270,6 +276,21 @@ fun sellerScreen(
             Spacer(modifier = Modifier.height(30.dp))
 
 
+            Button(onClick = {
+                if (sellerID != null) {
+                    ordersSellerSideViewModel.displayOrderForCurrentSeller(sellerID)
+                }
+                navController.navigate(NavigationPages.sellerOrderScreenPage)
+            }) {
+
+                    Text(text = "Clicke to view Orders")
+
+            }
+
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+
             TextButton(onClick = {
                 fireBaseAuthViewModel.signOut()
             }) {
@@ -288,7 +309,8 @@ fun sellerScreen(
                 fireStoreViewModel = fireStoreViewModel,
                 ui_viewModel = ui_viewModel,
                 fireBaseAuthViewModel = fireBaseAuthViewModel,
-                imageViewModel = imageViewModel
+                imageViewModel = imageViewModel,
+                pID = pID
             )
         }
     }
@@ -304,7 +326,8 @@ fun addProductDialogueCard(
     fireStoreViewModel: fireStoreViewModel,
     ui_viewModel: UI_ViewModel,
     fireBaseAuthViewModel: fireBaseAuthViewModel,
-    imageViewModel: imageViewModel
+    imageViewModel: imageViewModel,
+    pID : String
 ) {
 
     var pName by remember {
@@ -452,7 +475,8 @@ fun addProductDialogueCard(
                                         price = pCost,
                                         imageUri = selectedURI,
                                         sellerId = sellerId,
-                                        fireStoreViewModel = fireStoreViewModel
+                                        fireStoreViewModel = fireStoreViewModel,
+                                        pID =  pID
 
                                     )
 

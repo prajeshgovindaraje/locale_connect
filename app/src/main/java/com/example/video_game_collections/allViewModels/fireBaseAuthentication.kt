@@ -47,7 +47,7 @@ class fireBaseAuthViewModel : ViewModel(){
 
             }
             .addOnFailureListener {
-                Log.i("response","inside login failure")
+                Log.i("response","inside login failure ${it.message}")
 
                 _loginStatusState.value = loginStatus.LoggedOut
             }
@@ -146,6 +146,20 @@ class fireBaseAuthViewModel : ViewModel(){
             Log.i("shopName","got  shop name ${shopName}")
 
             callback(shopName)
+        }
+
+    }
+
+    fun getUserName( userID: String,callback:(String)-> Unit){
+
+        Log.i("username","isnide get user nme fun")
+
+        db.collection("users").document(userID).addSnapshotListener { value, error ->
+
+            var userName = value?.get("userName").toString()
+            Log.i("shopName","got  shop name ${userName}")
+
+            callback(userName)
         }
 
     }

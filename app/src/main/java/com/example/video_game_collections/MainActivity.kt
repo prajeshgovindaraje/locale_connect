@@ -16,13 +16,17 @@ import com.example.video_game_collections.ui.theme.Video_Game_CollectionsTheme
 
 
 import com.example.video_game_collections.Screens.BottomNavBar
+=======
+import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
 import com.example.video_game_collections.Screens.navUtitlity
 import com.example.video_game_collections.allViewModels.UI_ViewModel
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.fireStoreViewModel
 import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
-import com.example.video_game_collections.allViewModels.ordersViewModel
+import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
+import com.example.video_game_collections.allViewModels.ordersSellerSideViewModel
 
 
 
@@ -36,8 +40,9 @@ class MainActivity : ComponentActivity() {
         val ui_viewModel : UI_ViewModel by viewModels()
         val locationViewModel : locationViewModel by viewModels()
         val imageViewModel : imageViewModel by viewModels()
-        val ordersViewModel : ordersViewModel by viewModels()
-        val BottomNavBar = BottomNavBar()
+        val ordersCustomerSideViewModel : ordersCustomerSideViewModel by viewModels()
+        val ordersSellerSideViewModel : ordersSellerSideViewModel by viewModels()
+
 
 
         enableEdgeToEdge()
@@ -46,17 +51,18 @@ class MainActivity : ComponentActivity() {
 
             Video_Game_CollectionsTheme (){
                 val observedLoginStatus = myViewModel.loginStatusState.observeAsState()
+=======
+         
+
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    bottomBar = {
-                        BottomNavBar.SelectNavBar(
-                            myViewModel = myViewModel,
-                            observedLoginStatus = observedLoginStatus,
-                            navController = navController,
-                            viewModel = ui_viewModel
-                        )
-                    }
+//                    topBar = {
+//                        CenterAlignedTopAppBar(
+//                            title = {Text(text = "This app mine")}
+//                        )
+//
+//                    }
                 ) { innerPadding ->
 
                     navUtitlity(
@@ -64,9 +70,10 @@ class MainActivity : ComponentActivity() {
                         fireStoreViewModel,
                         ui_viewModel,
                         locationViewModel,
-                        ordersViewModel = ordersViewModel,
+                        ordersCustomerSideViewModel = ordersCustomerSideViewModel,
                         imageViewModel = imageViewModel,
                         modifier = Modifier.padding( innerPadding),
+                        ordersSellerSideViewModel = ordersSellerSideViewModel,
                         navController = navController
                     )
 
