@@ -94,13 +94,16 @@ class BottomNavBar {
     }
 
 
-    @Composable
+   
+   
+   
+   @Composable
     fun CustomerBNB(
         modifier: Modifier = Modifier,
         navController: NavHostController,
         viewModel: UI_ViewModel,
 
-        ) {
+    ) {
         // Observe the current back stack entry
         val currentScreen by viewModel.currentScreen.collectAsState()
 
@@ -117,83 +120,91 @@ class BottomNavBar {
             selectedItemIndex = selectedItemIndexState
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
 
-                .height(80.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.primaryContainer,
-                    shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
-                )
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
+                    .height(80.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp)
+                    )
             ) {
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
 
-                viewModel.listNavItems.forEachIndexed { index, navItem ->
-                    val isSelected = selectedItemIndex == index
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .weight(5f)
-                            .clickable {
-                                selectedItemIndex = index
-
-                                when (navItem.route) {
-                                    is NavigationPages.customerPage -> navController.navigate(
-                                        NavigationPages.customerPage
-                                    )
-
-                                    is NavigationPages.addToCartPage -> navController.navigate(
-                                        NavigationPages.addToCartPage
-                                    )
-
-                                    is NavigationPages.myOrdersPage -> navController.navigate(
-                                        NavigationPages.myOrdersPage
-                                    )
-
-                                    else -> Unit
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            if (isSelected) Modifier.offset(y = (-12).dp) else Modifier,
-                            horizontalAlignment = Alignment.CenterHorizontally
+                    viewModel.listNavItems.forEachIndexed { index, navItem ->
+                        val isSelected = selectedItemIndex == index
+                        Box(
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .weight(5f)
+                                .clickable {
+                                    selectedItemIndex = index
+                                    navController.navigate(navItem.route)
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Box(
-                                Modifier
-                                    .background(
-                                        if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
-                                        CircleShape
-                                    )
-                                    .size(50.dp),
-                                contentAlignment = Alignment.Center
+                            Column(
+                                if (isSelected) Modifier.offset(y = (-12).dp) else Modifier,
+                                horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Icon(
-                                    painter = painterResource(navItem.icon),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(30.dp),
-                                    tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary
-                                )
-                            }
-                            AnimatedVisibility(isSelected) {
-                                Text(
-                                    text = navItem.title,
-                                    modifier = Modifier.padding(top = 4.dp),
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = MaterialTheme.colorScheme.onPrimary
-                                )
+                                Box(
+                                    Modifier
+                                        .background(
+                                            if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else Color.Transparent,
+                                            CircleShape
+                                        )
+                                        .size(50.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(navItem.icon),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(30.dp),
+                                        tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                AnimatedVisibility(isSelected) {
+                                    Text(
+                                        text = navItem.title,
+                                        modifier = Modifier.padding(top = 4.dp),
+                                        style = MaterialTheme.typography.titleLarge,
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
     }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
 
 

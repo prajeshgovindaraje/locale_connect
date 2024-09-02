@@ -1,5 +1,6 @@
 package com.example.video_game_collections.allViewModels
 
+import android.util.MutableBoolean
 import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.gestures.ScrollableState
@@ -8,6 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
@@ -57,6 +59,12 @@ class UI_ViewModel : ViewModel() {
         _currentScreen.value = screen
     }
 
+    private val _switchSap = MutableStateFlow<Boolean>(false)
+    var switchSap : StateFlow<Boolean> = _switchSap
+
+    fun changeSap(value: Boolean){
+        _switchSap.value = value
+    }
 
     val listNavItems= listOf(
         NavItem(
@@ -77,7 +85,7 @@ class UI_ViewModel : ViewModel() {
         NavItem(
             R.drawable.baseline_person_24,
             "Profile",
-            NavigationPages.customerPage
+            NavigationPages.ProfilePage
         )
     )
 
