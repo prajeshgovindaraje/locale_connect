@@ -1,6 +1,7 @@
 package com.example.video_game_collections.Screens.CustomerScreens
 
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,7 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +40,11 @@ import coil.compose.AsyncImage
 import com.example.video_game_collections.Screens.NavigationPages
 import com.example.video_game_collections.allViewModels.fireBaseAuthViewModel
 import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
+import com.example.video_game_collections.helperFunctions.timestampToReadable
+import com.google.firebase.Timestamp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +62,11 @@ fun myOrdersScreen(
     LaunchedEffect(observedOrderedPoductsState.value) {
         Log.i("myOrdersScreen","in customer order "+observedOrderedPoductsState.value.toString())
         var userID =  fireBaseAuthViewModel.auth.currentUser?.let {
+
+
             ordersCustomerSideViewModel.displayCurrentUserOrders(it.uid)
+
+
         }
 
 
@@ -91,75 +103,180 @@ fun myOrdersScreen(
 
 
                     items(observedOrderedPoductsState.value){
+                        
+                        
+
                         var doc =  it["orderList"] as List<Map<String, Any>> // list of products in the order
+                        if(doc.isNotEmpty()){
+
+                            var isCancelledBySeller = it["isCancelledBySeller"]
 
 
-                        Card(
-                            modifier = Modifier.padding(8.dp),
-                            onClick = {
+                            Card(
+                                modifier = Modifier.padding(8.dp),
+                                colors =if(it["isCancelledBySeller"] == true || it["isCancelledByCustomer"] == true ) {
+                                    CardDefaults.cardColors(containerColor = Color.LightGray)
 
-                                Log.i("myOrdersScreen",it["orderList"].toString())
+                                }else{
+                                    CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
 
-                                //Display the products in the current order
-                                ordersCustomerSideViewModel.displayProductsInCurrentOrder(it["orderList"] as MutableList<Map<String,Any>>)
-                                navController.navigate(
-                                    NavigationPages.display_All_Products_In_CurrentOrder_ForCustomer_Page(
-                                    totalOrderCost = it["totalOrderCost"].toString()
-                                ))
+                                },
+                                onClick = {
 
-                            }
-                        ) {
-                            Row {
+                                    Log.i("myOrdersScreen",it["orderList"].toString())
+
+                                    //Display the products in the current order
+                                    ordersCustomerSideViewModel.displayProductsInCurrentOrder(it["orderList"] as MutableList<Map<String,Any>>)
+                                    navController.navigate(
+                                        NavigationPages.display_All_Products_In_CurrentOrder_ForCustomer_Page(
+
+                                            totalOrderCost = it["totalOrderCost"].toString(),
+                                            orderID = it["orderId"].toString()
+                                        ))
 
 
-                                var shopImageURL by remember{
-                                    mutableStateOf("")
                                 }
+                            ) {
 
 
-                                AsyncImage(
-                                    model =shopImageURL,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .height(150.dp)
-                                        .width(200.dp),
-                                    contentScale = ContentScale.Crop
-                                )
+                                Row {
 
 
-
-
-
-                                Column {
-
-                                    var shopName by remember{
+                                    var shopImageURL by remember{
                                         mutableStateOf("")
                                     }
 
-                                    var sellerID = doc.get(0).get("sellerID").toString()
-                                    var countList by remember { mutableStateOf(listOf(0, 0, 0)) }
+
+                                    AsyncImage(
+                                        model =shopImageURL,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .height(150.dp)
+                                            .width(200.dp),
+                                        contentScale = ContentScale.Crop
+                                    )
 
 
 
 
-                                    LaunchedEffect(sellerID,doc,observedOrderedPoductsState.value) {
-                                        Log.i("myOrdersScreen","in customer order 2nd Launched  "+observedOrderedPoductsState.value.toString())
+
+                                    Column {
+
+                                        var shopName by remember{
+                                            mutableStateOf("")
+                                        }
+
+                                        var sellerID = doc.get(0).get("sellerID").toString()
+                                        var countList by remember { mutableStateOf(listOf(0, 0, 0)) }
 
 
-                                        if (shopName.isEmpty()) {
-                                                    fireBaseAuthViewModel.getShopName(sellerID) { name ->
-                                                        shopName = name
+
+
+                                        LaunchedEffect(sellerID,doc,observedOrderedPoductsState.value) {
+                                            Log.i("myOrdersScreen","in customer order 2nd Launched  "+observedOrderedPoductsState.value.toString())
+
+
+                                            if (shopName.isEmpty()) {
+                                                fireBaseAuthViewModel.getShopName(sellerID) { name ->
+                                                    shopName = name
+                                                }
+                                                fireBaseAuthViewModel.getShopImage(sellerID){
+                                                    shopImageURL = it
+                                                }
+                                            }
+
+
+                                            // Calculate status counts
+                                            ordersCustomerSideViewModel.countStatus(doc) {
+                                                countList = it
+                                            }
+
+
+
+                                        }
+
+
+
+
+                                        Text(text = "shopName: $shopName")
+
+
+                                        Text(text = "Cost: ${it["totalOrderCost"]}")
+
+
+
+                                        val formattedDate = timestampToReadable(it["timestamp"] as Timestamp)
+                                        Text(text = "PickUpTime: ${formattedDate}")
+
+
+                                        Row(
+                                            modifier = Modifier.fillMaxWidth(),
+
+                                            ) {
+                                            if(it["isCancelledByCustomer"] == false && it["isCancelledBySeller"] == false ){
+                                                Button(onClick = {
+                                                    //makeCustomerCancelledTrue
+                                                    ordersCustomerSideViewModel.makeCustomerCancelTrue(it["orderId"].toString())
+
+
+                                                },
+                                                    modifier = Modifier.size(100.dp,60.dp)
+                                                ) {
+
+                                                    Text(text = "ORDER CANCEL")
+
+                                                }
+                                            }else{
+
+                                                Button(onClick = {
+                                                    //makeCustomerRemovedTrue if seller hasnt removed it
+                                                    if(it["isRemovedBySeller"] == false){
+                                                        ordersCustomerSideViewModel.makeCustomerRemoveTrue(it["orderId"].toString())
+                                                    }else{
+                                                        ordersCustomerSideViewModel.deleteEntireOrder(it["orderId"].toString())
                                                     }
-                                                    fireBaseAuthViewModel.getShopImage(sellerID){
-                                                        shopImageURL = it
-                                                    }
+
+
+
+                                                },
+                                                    modifier = Modifier.size(100.dp,60.dp)
+                                                ) {
+
+                                                    Text(text = "Remove Order")
+
                                                 }
 
+                                            }
 
-                                        // Calculate status counts
-                                        ordersCustomerSideViewModel.countStatus(doc) {
-                                            countList = it
-                                        }
+
+
+                                            var totalProductsInTheOrder = doc.size
+
+
+                                            val pendingCnt = countList.get(0) //pending
+                                            val acceptedCnt = countList.get(1) // accepted
+                                            val rejectedCnt = countList.get(2) // rejected
+
+
+
+
+
+                                            Column {
+                                                Text(
+                                                    text = "Pending: ${pendingCnt}/${totalProductsInTheOrder} ",
+                                                    color = Color.Red
+                                                )
+                                                Text(
+                                                    text = "Accepted: ${acceptedCnt}/${totalProductsInTheOrder} ",
+                                                    color = Color.Red
+                                                )
+                                                Text(
+                                                    text = "Rejected: ${rejectedCnt}/${totalProductsInTheOrder} ",
+                                                    color = Color.Red
+                                                )
+
+
+
 
 
 
@@ -168,79 +285,27 @@ fun myOrdersScreen(
 
 
 
-                                    Text(text = "shopName: $shopName")
-
-
-                                    Text(text = "Cost: ${it["totalOrderCost"]}")
-                                    Text(text = "Time: ${it["timestamp"]}")
-
-
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-
-                                    ) {
-                                        Button(onClick = {
-
-                                            ordersCustomerSideViewModel.deleteEntireOrder(
-
-                                                orderID = it["orderId"].toString(),
-                                                buyerID = it["buyerID"].toString(),
-                                                orderList = it["orderList"] as MutableList<Map<String,Any>>,
-                                                currentTime = it["timestamp"].toString(),
-                                                totalOrderCost = it["totalOrderCost"].toString().toDouble(),
-                                                sellerID = it["sellerID"].toString(),
-                                                status = it["status"].toString()
-
-
-                                            )
-
-                                        },
-                                            modifier = Modifier.size(100.dp,60.dp)
-                                        ) {
-
-                                            Text(text = "ORDER CANCEL")
-
                                         }
 
+                                        //display cancelled by whom
+                                        if(it["isCancelledByCustomer"] == true && it["isCancelledBySeller"] == false){
+                                            Text(text = "Cancelled By Customer")
+                                        }else if(it["isCancelledByCustomer"] == false && it["isCancelledBySeller"] == true){
+                                            Text(text = "Cancelled By Seller")
 
-
-                                        var totalProductsInTheOrder = doc.size
-
-
-                                        val pendingCnt = countList.get(0) //pending
-                                        val acceptedCnt = countList.get(1) // accepted
-                                        val rejectedCnt = countList.get(2) // rejected
-
-
-
-
-
-                                        Column {
-                                            Text(
-                                                text = "Pending: ${pendingCnt}/${totalProductsInTheOrder} ",
-                                                color = Color.Red
-                                            )
-                                            Text(
-                                                text = "Accepted: ${acceptedCnt}/${totalProductsInTheOrder} ",
-                                                color = Color.Red
-                                            )
-                                            Text(
-                                                text = "Rejected: ${rejectedCnt}/${totalProductsInTheOrder} ",
-                                                color = Color.Red
-                                            )
                                         }
-
-
-
 
                                     }
 
 
 
                                 }
-
                             }
+                            
+                        }else{
+                            Text(text = "No Order s ra ")
                         }
+                        
 
                     }
 

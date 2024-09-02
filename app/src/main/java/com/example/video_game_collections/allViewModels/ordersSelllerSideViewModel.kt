@@ -32,7 +32,12 @@ class ordersSellerSideViewModel: ViewModel(){
                 if (value != null) {
                     for(orders in value){
 
-                        tempDisplayOrdersToSellerListState += orders.data as Map<String,Any>
+                            if(orders.get("isRemovedBySeller") == false){
+                                tempDisplayOrdersToSellerListState += orders.data as Map<String,Any>
+
+                            }
+
+
 
 
                     }
@@ -40,6 +45,42 @@ class ordersSellerSideViewModel: ViewModel(){
 
                 _displayOrdersToSellerListState.value = tempDisplayOrdersToSellerListState.toMutableList()
             }
+
+    }
+
+    fun makeSellerRemoveTrue(orderId:String){
+
+        db.collection("orders")
+            .whereEqualTo("orderId",orderId)
+            .get()
+            .addOnSuccessListener {
+
+                val id  = it.documents.get(0).id
+
+                db.collection("orders").document(id)
+                    .update("isRemovedBySeller",true)
+
+            }
+
+
+
+    }
+
+    fun makeSellerCancelTrue(orderId:String){
+
+        db.collection("orders")
+            .whereEqualTo("orderId",orderId)
+            .get()
+            .addOnSuccessListener {
+
+                val id  = it.documents.get(0).id
+
+                db.collection("orders").document(id)
+                    .update("isCancelledBySeller",true)
+
+            }
+
+
 
     }
 

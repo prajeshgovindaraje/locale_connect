@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
@@ -363,9 +365,10 @@ fun addProductDialogueCard(
             shape = RoundedCornerShape(15.dp),
             elevation = CardDefaults.cardElevation(8.dp),
             modifier = Modifier
-                .fillMaxHeight(0.5f)
+                .fillMaxHeight(0.7f)
                 .fillMaxWidth(0.9f)
-                .border(1.dp, Color.Cyan, RoundedCornerShape(15.dp)),
+                .border(1.dp, Color.Cyan, RoundedCornerShape(15.dp))
+                .verticalScroll(state = rememberScrollState())
 
 
         ) {
@@ -436,7 +439,7 @@ fun addProductDialogueCard(
                             Button(onClick = {
                                         galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                             }) {
-                                Text(text = "ADD IMAGE FOR YOUR PRODUCT")
+                                Text(text = "ADD IMAGE")
                             }
                         }
                     }

@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import com.example.video_game_collections.dataModels.OrderStatus
 import com.example.video_game_collections.dataModels.productOrderModel
 import com.example.video_game_collections.helperFunctions.generateRandomID
+import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FirebaseFirestore
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -22,6 +23,10 @@ class ordersCustomerSideViewModel : ViewModel(){
     //track total cost of all the ordered products
     private var _totalCost = MutableLiveData<Double>(0.0)
     var totalCost : LiveData<Double> = _totalCost
+
+    //track Order Picke Up Time
+    private var _formattedPickUpTimeState = MutableLiveData<String>("nothing")
+    var formattedPickUpTimeState : LiveData<String> = _formattedPickUpTimeState
 
     //list to store all the added products
     private var _productsInCartState = MutableLiveData<MutableList<productOrderModel>>()
@@ -108,6 +113,13 @@ class ordersCustomerSideViewModel : ViewModel(){
         _totalCost.value = _totalCost.value?.minus(pCost)
     }
 
+    fun setFormattedPickUpTime(formattedPickUpTime:String){
+        _formattedPickUpTimeState.value = formattedPickUpTime
+    }
+    fun getFormattedPickUpTime():String{
+        return formattedPickUpTimeState.value ?: "nothing retreived from getPickUpTime"
+    }
+
 
 
 
@@ -120,10 +132,18 @@ class ordersCustomerSideViewModel : ViewModel(){
         buyerID : String,
         status : String,
         sellerID : String,
+        pickUpTime: Timestamp,
+
+        isCancelledBySeller : Boolean,
+        isCancelledByCustomer : Boolean,
+
+        isRemovedBySeller : Boolean,
+        isRemovedByCustomer : Boolean,
+
+
     ){
 
-        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
-        val currentTime = dateFormat.format(Date())
+        val currentTime = Timestamp(Date())
         val orderID = generateRandomID().generateRandomAlphanumericString(20)
 
         val orderDocument = mapOf(
@@ -134,6 +154,13 @@ class ordersCustomerSideViewModel : ViewModel(){
             "orderId" to orderID,
             "sellerID" to sellerID,
             "status" to status,
+            "pickUpTime" to pickUpTime,
+
+            "isCancelledBySeller" to isCancelledBySeller,
+            "isCancelledByCustomer" to isCancelledByCustomer,
+
+            "isRemovedBySeller" to isRemovedBySeller,
+            "isRemovedByCustomer" to isRemovedByCustomer
         )
 
         db.collection("orders").add(orderDocument)
@@ -143,6 +170,7 @@ class ordersCustomerSideViewModel : ViewModel(){
                 tempProductsInCartList.clear()
                 _productsInCartState.value = tempProductsInCartList.toMutableList()
                 _totalCost.value = 0.0
+                _formattedPickUpTimeState.value = "nothing"
                 tempProductsCountMap.clear()
                 _productsCountMapState.value = tempProductsCountMap.toMutableMap()
 
@@ -156,11 +184,12 @@ class ordersCustomerSideViewModel : ViewModel(){
 
 
     var tempOrderedProductMap = mutableListOf<Map<String,Any>>()
+    //display customer order
     fun displayCurrentUserOrders(
-        buyerId : String
+        userID : String
     ){
         db.collection("orders")
-            .whereEqualTo("buyerID",buyerId)
+            .whereEqualTo("buyerID",userID)
             .addSnapshotListener { value, error ->
                 tempOrderedProductMap.clear()
 
@@ -169,14 +198,22 @@ class ordersCustomerSideViewModel : ViewModel(){
 
                 if (value != null) {
                     for (doc in value){
-                        tempOrderedProductMap += doc.data as Map<String,Any>
-                        Log.i("orderProd","tempOrderedProductMap update  success")
 
-                        _ordersMapState.value = tempOrderedProductMap.toMutableList()
+
+                       if( doc.get("isRemovedByCustomer") == false){
+                           tempOrderedProductMap += doc.data as Map<String,Any>
+
+                           Log.i("orderProd","tempOrderedProductMap update  success")
+
+                       }
+
 
 
                     }
                 }
+                _ordersMapState.value = tempOrderedProductMap.toMutableList()
+
+
             }
 
     }
@@ -184,13 +221,7 @@ class ordersCustomerSideViewModel : ViewModel(){
 
 
     fun deleteEntireOrder(
-        orderID: String,
-        currentTime: String,
-        buyerID: String,
-        orderList : MutableList<Map<String,Any>>,
-        totalOrderCost : Double,
-        status : String,
-        sellerID: String
+        orderID: String
 
     ){
 
@@ -221,9 +252,9 @@ class ordersCustomerSideViewModel : ViewModel(){
 
 
 
-    var tempDisplayProductsInCurrentOrderList = (mutableListOf<Map<String,Any>> ())
+    var tempDisplayProductsInCurrentOrderList = mutableListOf<Map<String,Any>>()
     fun displayProductsInCurrentOrder(orderedList : MutableList<Map<String,Any>>){
-
+        Log.i("productState","inside display products")
         db.collection("orders")
             .whereEqualTo("orderList",orderedList)
             .addSnapshotListener { value, error ->
@@ -232,8 +263,9 @@ class ordersCustomerSideViewModel : ViewModel(){
                 if(value != null && !value.isEmpty){
                     var tempOrderMap = value.documents.get(0).data as MutableMap<String, Any>
                     var tempProductList = tempOrderMap["orderList"]  as MutableList<MutableMap<String, Any>>
-                    tempDisplayProductsInCurrentOrderList += orderedList
+                    tempDisplayProductsInCurrentOrderList += tempProductList
 
+                    Log.i("productState","display products "+_displayProductsInCurrentOrderListState.value.toString())
                     _displayProductsInCurrentOrderListState.value = tempDisplayProductsInCurrentOrderList.toMutableList()
 
                 }
@@ -249,6 +281,8 @@ class ordersCustomerSideViewModel : ViewModel(){
 
     }
 
+
+    //this counts and returns the no. of PENDING,ACCEPTED,RJECTED products in a order currently
     fun countStatus(
         productsInOrderList:List<Map<String,Any>>,
         onSuccess:(MutableList<Int>) -> Unit
@@ -267,12 +301,20 @@ class ordersCustomerSideViewModel : ViewModel(){
             }
         }
 
+
+
         onSuccess(countList)
     }
 
 
-    fun changeStateToAcceptedOrRejected(buyerID: String,orderID:String,pID:String,status:OrderStatus,context: Context){
-        displayCurrentUserOrders(buyerID)
+    fun changeStateToAcceptedOrRejected(
+        userID: String,
+        orderID: String,
+        pID: String,
+        status: OrderStatus,
+        context: Context,
+        productList : MutableList<Map<String,Any>>
+    ){
         Log.i("changeStateToAccepted","inside state change")
 
         db.collection("orders")
@@ -287,15 +329,16 @@ class ordersCustomerSideViewModel : ViewModel(){
                     var docID = it.documents.get(0).id
 
                     var tempOrderMap = it.documents.get(0).data  as MutableMap<String, Any>
-                    Log.i("changeStateToAccepted","map = "+tempOrderMap.toString())
+                  //  Log.i("changeStateToAccepted","map = "+tempOrderMap.toString())
                     var tempProductList = tempOrderMap["orderList"]  as MutableList<MutableMap<String, Any>>
-                    Log.i("changeStateToAccepted","list = "+tempProductList.toString())
+                    Log.i("changeStateToAccepted","before update list = "+tempProductList.toString())
 
                     for (doc in tempProductList){
                         if(doc.get("pid") == pID){
-                            doc["status"] = status
+                            doc["status"] = status.name
                         }
                     }
+                    Log.i("changeStateToAccepted","after update list = "+tempProductList.toString())
 
 
                     // Update the document in Firestore with the properly formatted map
@@ -303,6 +346,16 @@ class ordersCustomerSideViewModel : ViewModel(){
 
                     db.collection("orders").document(docID)
                         .update("orderList",tempProductList)
+                        .addOnSuccessListener {
+                            Log.i("changeStateToAccepted","update success")
+                            displayProductsInCurrentOrder(tempProductList as MutableList<Map<String,Any>>)
+                           // displayCurrentUserOrders(userID)
+
+
+                        }
+                        .addOnFailureListener {
+                            Log.i("changeStateToAccepted",it.message.toString())
+                        }
 
                 }else{
                     Toast.makeText(context,"The Order has been cancelled by the user. Go back.",Toast.LENGTH_LONG).show()
@@ -321,8 +374,113 @@ class ordersCustomerSideViewModel : ViewModel(){
 
 
 
+    fun makeCustomerRemoveTrue(orderId:String){
 
-    
+        db.collection("orders")
+            .whereEqualTo("orderId",orderId)
+            .get()
+            .addOnSuccessListener {
+
+                val id  = it.documents.get(0).id
+
+                db.collection("orders").document(id)
+                    .update("isRemovedByCustomer",true)
+
+            }
+
+
+
+    }
+
+    fun makeCustomerCancelTrue(orderId:String){
+
+        db.collection("orders")
+            .whereEqualTo("orderId",orderId)
+            .get()
+            .addOnSuccessListener {
+
+                val id  = it.documents.get(0).id
+
+                db.collection("orders").document(id)
+                    .update("isCancelledByCustomer",true)
+
+            }
+
+
+
+    }
+
+
+    fun deleteIndovidualProduct( pid:String,orderId:String){
+
+
+        db.collection("orders")
+            .whereEqualTo("orderId",orderId)
+            .get()
+            .addOnSuccessListener { //get the document
+
+                if(!it.isEmpty && it != null){
+                    val docID = it.documents.get(0).id
+
+                    db.collection("orders").document(docID)
+                        .get()
+                        .addOnSuccessListener {//from the only document that is matched
+                            val buyerId = it.get("buyerID")
+                            var  tempProductList:MutableList<Map<String,Any>> = it.get("orderList") as MutableList<Map<String,Any>>
+                            if(tempProductList.size == 1){
+                                makeCustomerCancelTrue(it.get("orderId").toString())
+                                makeCustomerRemoveTrue(it.get("orderId").toString())
+                            }
+
+                            val indexOfCurrentProduct = tempProductList.indexOfLast {
+                                it["pid"] == pid
+                            }
+
+                            if (indexOfCurrentProduct != -1) {
+                                Log.i("IndexFound", "Product index: $indexOfCurrentProduct")
+                                var tempCost = it.get("totalOrderCost").toString().toDouble() - tempProductList.get(indexOfCurrentProduct).get("totalProductCost").toString().toDouble()
+
+
+
+                                tempProductList.removeAt(indexOfCurrentProduct)
+
+                                db.collection("orders").document(docID)
+                                    .update("orderList",tempProductList)
+                                    .addOnSuccessListener {
+                                        db.collection("orders").document(docID)
+                                            .update("totalOrderCost",tempCost)
+                                            .addOnSuccessListener {
+                                                 displayProductsInCurrentOrder(tempProductList)
+                                                displayCurrentUserOrders(buyerId.toString())
+
+                                            }
+
+                                    }
+
+
+
+
+                            } else {
+                                // Product not found
+                                Log.i("IndexNotFound", "Product with pid $pid not found in orderList")
+                            }
+
+
+                        }
+
+                }
+
+
+            }
+
+
+    }
+
+
+
+
+
+
 
 
 
