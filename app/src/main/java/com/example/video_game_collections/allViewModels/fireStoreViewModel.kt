@@ -37,6 +37,7 @@ class fireStoreViewModel : ViewModel() {
 
 
     init {
+
        // displayAllProductsBySeller()
 
     }

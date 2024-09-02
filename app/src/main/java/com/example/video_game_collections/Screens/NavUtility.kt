@@ -1,13 +1,10 @@
 package com.example.video_game_collections.Screens
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.example.video_game_collections.Screens.CustomerScreens.ProfileScreen
 import com.example.video_game_collections.Screens.CustomerScreens.addToCartScreen
@@ -23,8 +20,11 @@ import com.example.video_game_collections.allViewModels.imageViewModel
 import com.example.video_game_collections.allViewModels.locationViewModel
 import com.example.video_game_collections.allViewModels.ordersCustomerSideViewModel
 import com.example.video_game_collections.allViewModels.ordersSellerSideViewModel
+import com.example.video_game_collections.dataModels.productOrderModel
+import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
-import okhttp3.Route
+import kotlinx.serialization.json.Json
+
 
 @Composable
 fun navUtitlity(
@@ -39,6 +39,8 @@ fun navUtitlity(
     modifier: Modifier
 
 ) {
+
+
 
     NavHost(navController = navController , startDestination = NavigationPages.loginPage) {
 
@@ -107,7 +109,9 @@ fun navUtitlity(
             addToCartScreen(
                 ordersCustomerSideViewModel = ordersCustomerSideViewModel,
                 navController = navController,
-                fireBaseAuthViewModel = viewModel
+                fireBaseAuthViewModel = viewModel,
+                uiViewmodel = ui_viewModel
+
             )
         }
 
@@ -124,7 +128,9 @@ fun navUtitlity(
             val args = it.toRoute<NavigationPages.display_All_Products_In_CurrentOrder_ForCustomer_Page>()
             displayProductsInCurrentOrder(
                 ordersCustomerSideViewModel = ordersCustomerSideViewModel,
-                totalOrderCost = args.totalOrderCost
+                totalOrderCost = args.totalOrderCost,
+                orderId = args.orderID
+
 
 
             )
@@ -132,12 +138,20 @@ fun navUtitlity(
 
         composable<NavigationPages.display_All_Products_In_CurrentOrder_ForSeller_Page> {
             val args = it.toRoute<NavigationPages.display_All_Products_In_CurrentOrder_ForSeller_Page>()
+
+           // val jsonListOfProductsInOrder = args.listOfProducts
+
+            // Deserialize the JSON back to MutableList<Map<String, Any>>
+          //  val listOfProductsInOrder: MutableList<productOrderModel> =
+             //   Json.decodeFromString(jsonListOfProductsInOrder)
+
             displayProductsInCurrentOrderForSeller(
                 ordersCustomerSideViewModel = ordersCustomerSideViewModel,
                 totalOrderCost = args.totalOrderCost,
                 orderID = args.orderID,
                 ordersSellerSideViewModel = ordersSellerSideViewModel,
-                buyerID = args.buyerID
+                buyerID = args.buyerID,
+               // listOfProductsInOrder = listOfProductsInOrder
 
 
             )
@@ -214,15 +228,15 @@ sealed class NavigationPages(){
 
     @Serializable
     data class display_All_Products_In_CurrentOrder_ForCustomer_Page(
-        val totalOrderCost : String
+        val totalOrderCost : String,
+        val orderID: String
     )
-    
 
     @Serializable
     data class display_All_Products_In_CurrentOrder_ForSeller_Page(
         val totalOrderCost : String,
         val orderID : String,
-        val buyerID : String
+        val buyerID : String,
 
     )
 

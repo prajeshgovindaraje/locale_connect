@@ -2,6 +2,7 @@ package com.example.video_game_collections.dataModels
 
 import kotlinx.serialization.Serializable
 
+@Serializable
 data class productOrderModel(
 
     val pName : String,
@@ -19,6 +20,8 @@ data class productOrderModel(
 
 
 ){
+
+
      override fun equals(other: Any?): Boolean {
 
 

@@ -78,7 +78,9 @@ class fireBaseAuthViewModel : ViewModel(){
                     userName = userName,
                     shopName = shopName,
                     shopType = shopType,
-                    location = emptyList()
+                    location = emptyList(),
+                    shopImage = null
+
                 )
 
 

@@ -1,6 +1,7 @@
 package com.example.video_game_collections.allViewModels
 
 import android.util.MutableBoolean
+import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.gestures.ScrollableState
 import androidx.compose.foundation.rememberScrollState
@@ -28,7 +29,8 @@ class UI_ViewModel : ViewModel() {
     var addProductDialogueCardState : LiveData<Boolean> = _addProductDialogueCardState
 
 
-
+    private var _datePickerDialogState = MutableLiveData<Boolean>()
+    var datePickerDialogState:LiveData<Boolean> = _datePickerDialogState
 
 
     fun makeAddProductDialogueCardHidden(){
@@ -37,6 +39,14 @@ class UI_ViewModel : ViewModel() {
 
     fun makeAddProductDialogueCardVisible(){
         _addProductDialogueCardState.value = true
+    }
+
+    fun makeDatePickerDialogVisible(){
+        Log.i("dateTime", " inside make dialgue visibe fun")
+        _datePickerDialogState.value = true
+    }
+    fun makeDatePickerDialogVHidden(){
+        _datePickerDialogState.value = false
     }
 
 

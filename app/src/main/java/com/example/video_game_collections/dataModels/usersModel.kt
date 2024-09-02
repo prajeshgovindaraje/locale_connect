@@ -7,7 +7,8 @@ data class usersModel(
     val email : String,
     val role : String,
     val shopName : String?,
-    val shopType : String?
+    val shopType : String?,
+    val shopImage : String?
 
 
 )

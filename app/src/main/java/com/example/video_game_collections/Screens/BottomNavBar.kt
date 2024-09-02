@@ -94,7 +94,10 @@ class BottomNavBar {
     }
 
 
-    @Composable
+   
+   
+   
+   @Composable
     fun CustomerBNB(
         modifier: Modifier = Modifier,
         navController: NavHostController,
@@ -179,6 +182,29 @@ class BottomNavBar {
             }
 
     }
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
+   
 
 
 
