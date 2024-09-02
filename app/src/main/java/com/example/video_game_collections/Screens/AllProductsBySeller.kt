@@ -72,7 +72,6 @@ fun allProductsBySeller(
             Card(
                 modifier = Modifier.fillMaxWidth(0.8f).padding(16.dp),
 
-
             ) {
 
                 Column(

@@ -31,6 +31,9 @@ class fireStoreViewModel : ViewModel() {
     private var _allShopsForCustomerState = MutableLiveData<MutableList<shopCardModel>>()
     var allShopsForCustomerState :LiveData<MutableList<shopCardModel>> = _allShopsForCustomerState
 
+    private var _allProductswithSellerId = MutableLiveData<MutableList<AllProductwithSellerID>>()
+    var allProductwithSellerID : LiveData<MutableList<AllProductwithSellerID>> = _allProductswithSellerId
+
 
 
     init {
@@ -94,7 +97,7 @@ class fireStoreViewModel : ViewModel() {
         // check for duplicate product names
         Log.i("duplicateProduct","runs")
         var isDuplicatePresent = false
-            db.collection(productsCollection)
+        db.collection(productsCollection)
                 .whereEqualTo("sellerID",sellerId)
                 .get()
                 .addOnSuccessListener {products ->
@@ -189,9 +192,12 @@ class fireStoreViewModel : ViewModel() {
                         tempProductsListBySeller.add(tempProductModel)
                     }
                 }
-
-                _allProductsBySellerState.value = tempProductsListBySeller.toMutableList()
+                val tempAllProductwithSellerID: List<AllProductwithSellerID> = listOf(AllProductwithSellerID.sellerId(userID))+ tempProductsListBySeller.map { AllProductwithSellerID.product(it) }
+                _allProductswithSellerId.value = tempAllProductwithSellerID.toMutableList()
             }
+    }
+    fun removeHeader() {
+        _allProductswithSellerId.value = _allProductswithSellerId.value?.filterNot { it is AllProductwithSellerID.sellerId }?.toMutableList()
     }
 
     fun changeDisplayAllProductsBySellerOrder(pID: String) {
@@ -374,11 +380,11 @@ class fireStoreViewModel : ViewModel() {
             }
 
     }
+    
 
+}
 
-
-
-
-
-
+sealed class AllProductwithSellerID{
+    data class product(val product: productModel) : AllProductwithSellerID()
+    data class sellerId(val id: String): AllProductwithSellerID()
 }

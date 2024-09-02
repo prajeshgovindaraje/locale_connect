@@ -140,22 +140,7 @@ class BottomNavBar {
                                 .weight(5f)
                                 .clickable {
                                     selectedItemIndex = index
-
-                                    when (navItem.route) {
-                                        is NavigationPages.customerPage -> navController.navigate(
-                                            NavigationPages.customerPage
-                                        )
-
-                                        is NavigationPages.addToCartPage -> navController.navigate(
-                                            NavigationPages.addToCartPage
-                                        )
-
-                                        is NavigationPages.myOrdersPage -> navController.navigate(
-                                            NavigationPages.myOrdersPage
-                                        )
-
-                                        else -> Unit
-                                    }
+                                    navController.navigate(navItem.route)
                                 },
                             contentAlignment = Alignment.Center
                         ) {
@@ -166,7 +151,7 @@ class BottomNavBar {
                                 Box(
                                     Modifier
                                         .background(
-                                            if (isSelected) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+                                            if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else Color.Transparent,
                                             CircleShape
                                         )
                                         .size(50.dp),
@@ -176,7 +161,7 @@ class BottomNavBar {
                                         painter = painterResource(navItem.icon),
                                         contentDescription = null,
                                         modifier = Modifier.size(30.dp),
-                                        tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.secondary
+                                        tint = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary
                                     )
                                 }
                                 AnimatedVisibility(isSelected) {
@@ -184,7 +169,7 @@ class BottomNavBar {
                                         text = navItem.title,
                                         modifier = Modifier.padding(top = 4.dp),
                                         style = MaterialTheme.typography.titleLarge,
-                                        color = MaterialTheme.colorScheme.onPrimary
+                                        color = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }

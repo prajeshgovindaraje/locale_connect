@@ -9,6 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
+import com.example.video_game_collections.Screens.CustomerScreens.ProfileScreen
 import com.example.video_game_collections.Screens.CustomerScreens.addToCartScreen
 import com.example.video_game_collections.Screens.CustomerScreens.allProductsForCustomer
 import com.example.video_game_collections.Screens.CustomerScreens.allProductsForCustomerByThisSeller
@@ -153,6 +154,13 @@ fun navUtitlity(
             )
         }
 
+        composable<NavigationPages.ProfilePage> {
+            ProfileScreen(
+                fireStoreViewModel = fireStoreViewModel,
+                fireBaseAuthViewModel = viewModel,
+                navController = navController
+            )
+        }
 
     }
 
@@ -221,7 +229,10 @@ sealed class NavigationPages(){
 
 
     @Serializable
-    object sellerOrderScreenPage
+    object sellerOrderScreenPage:NavigationPages()
+
+    @Serializable
+    object ProfilePage: NavigationPages()
 
 }
 
